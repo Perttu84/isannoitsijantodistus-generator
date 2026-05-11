@@ -54,12 +54,14 @@ textarea{resize:vertical;min-height:64px}
 .hallinta-row .f label{font-size:.72rem;font-weight:600;color:#555}
 .hallinta-row .f input{width:140px}
 
-.actions{display:flex;gap:1rem;align-items:center}
+.actions{display:flex;gap:1rem;align-items:center;width:100%}
 button.btn-primary{background:#0d3b66;color:#fff;border:none;border-radius:8px;padding:.7rem 2rem;font-family:inherit;font-size:.9rem;font-weight:600;cursor:pointer}
 button.btn-primary:hover{background:#0a2f52}
 button.btn-secondary{background:#e8edf3;color:#0d3b66;border:none;border-radius:8px;padding:.7rem 1.4rem;font-family:inherit;font-size:.9rem;font-weight:600;cursor:pointer}
 button.btn-secondary:hover{background:#d8e0ec}
 .status{font-size:.85rem;color:#2d7a4f;font-weight:600}
+.bmc-btn{margin-left:auto;display:inline-flex;align-items:center;gap:.4rem;background:#FFDD00;color:#000;font-weight:700;font-size:.85rem;padding:.55rem 1.1rem;border-radius:8px;text-decoration:none;white-space:nowrap}
+.bmc-btn:hover{background:#f0ce00}
 
 .autopaikat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:.6rem}
 .num-row{display:flex;flex-direction:column;gap:.2rem}
@@ -712,6 +714,7 @@ button.btn-secondary:hover{background:#d8e0ec}
     <button type="button" class="btn-primary" onclick="generatePDF()">Luo PDF</button>
     <button type="button" class="btn-secondary" onclick="clearForm()">Tyhjennä lomake</button>
     <span class="status" id="status"></span>
+    <a href="https://www.buymeacoffee.com/punis" target="_blank" rel="noopener" class="bmc-btn">☕ Osta kahvi</a>
   </div>
 </div>
 </form>
@@ -782,14 +785,71 @@ const T = {
     <input type="text" placeholder="Ajankohta / suunniteltu" class="mid"/>`,
 };
 
+// ─── localStorage ────────────────────────────────────────────────────────────
+const STORAGE_KEY = 'isannoitsijantodistus_v1';
+const DYN_IDS = [
+  'dyn-osakas-tyot','dyn-yhtio-tyot','dyn-kunnossapitovastuu','dyn-viat',
+  'dyn-paaomavastike','dyn-muutvastikkeet','dyn-muutmaksut','dyn-hoitolainat',
+  'dyn-nostamattomat31','dyn-eraantyneet-vast','dyn-eraantyneet-maksut',
+  'dyn-yhtiolainat','dyn-luotolliset','dyn-kiinnitykset',
+  'dyn-kuntoarviot','dyn-paatetyt','dyn-hall-ehdotukset','dyn-kokous-korjaukset',
+];
+
+function saveToStorage() {
+  const data = { fields: {}, dyn: {} };
+  document.querySelectorAll('#form input, #form textarea, #form select').forEach(el => {
+    if (!el.id || el.closest('.dyn-container')) return;
+    data.fields[el.id] = el.type === 'checkbox' ? el.checked : el.value;
+  });
+  DYN_IDS.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) data.dyn[id] = el.innerHTML;
+  });
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch(e) {}
+  showSaved();
+}
+
+function loadFromStorage() {
+  let data;
+  try { data = JSON.parse(localStorage.getItem(STORAGE_KEY)); } catch(e) {}
+  if (!data) return;
+  Object.entries(data.fields || {}).forEach(([id, val]) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (el.type === 'checkbox') el.checked = val;
+    else el.value = val;
+  });
+  Object.entries(data.dyn || {}).forEach(([id, html]) => {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = html;
+  });
+}
+
+let saveTimer;
+function scheduleSave() { clearTimeout(saveTimer); saveTimer = setTimeout(saveToStorage, 600); }
+
+function showSaved() {
+  const s = document.getElementById('status');
+  s.textContent = 'Tallennettu automaattisesti';
+  clearTimeout(s._t);
+  s._t = setTimeout(() => { if (s.textContent.startsWith('Tallennettu')) s.textContent = ''; }, 2000);
+}
+
+document.getElementById('form').addEventListener('input', scheduleSave);
+document.getElementById('form').addEventListener('change', scheduleSave);
+
+// ─── Dynamic rows ─────────────────────────────────────────────────────────────
 function addRow(containerId, type) {
   const c = document.getElementById(containerId);
   const row = document.createElement('div');
   row.className = 'dyn-row';
   row.innerHTML = T[type]() +
-    `<button type="button" class="btn-rem" title="Poista rivi" onclick="this.closest('.dyn-row').remove()">×</button>`;
+    `<button type="button" class="btn-rem" title="Poista rivi" onclick="removeRow(this)">×</button>`;
   c.appendChild(row);
+  scheduleSave();
 }
+
+function removeRow(btn) { btn.closest('.dyn-row').remove(); scheduleSave(); }
 
 // ─── PDF helpers ──────────────────────────────────────────────────────────────
 function gv(id) { const el = document.getElementById(id); return el ? (el.value || '').trim() : ''; }
@@ -826,7 +886,11 @@ function dynRows(containerId) {
 }
 
 function clearForm() {
-  if (confirm('Tyhjennä koko lomake?')) document.getElementById('form').reset();
+  if (!confirm('Tyhjennä koko lomake ja poistetaanko tallennetut tiedot?')) return;
+  document.getElementById('form').reset();
+  DYN_IDS.forEach(id => { const el = document.getElementById(id); if (el) el.innerHTML = ''; });
+  try { localStorage.removeItem(STORAGE_KEY); } catch(e) {}
+  document.getElementById('status').textContent = '';
 }
 
 function generatePDF() {
@@ -1155,6 +1219,8 @@ function generatePDF() {
   s.textContent = 'PDF ladattu!';
   setTimeout(() => { s.textContent = ''; }, 3000);
 }
+
+loadFromStorage();
 </script>
 </body>
 </html>
