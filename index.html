@@ -714,7 +714,7 @@ button.btn-secondary:hover{background:#d8e0ec}
     <button type="button" class="btn-primary" onclick="generatePDF()">Luo PDF</button>
     <button type="button" class="btn-secondary" onclick="clearForm()">Tyhjennä lomake</button>
     <span class="status" id="status"></span>
-    <a href="https://www.buymeacoffee.com/punis" target="_blank" rel="noopener" class="bmc-btn">☕ Osta kahvi</a>
+    <a href="https://www.buymeacoffee.com/punis" target="_blank" rel="noopener" class="bmc-btn">🍺 Osta olut</a>
   </div>
 </div>
 </form>
@@ -803,7 +803,11 @@ function saveToStorage() {
   });
   DYN_IDS.forEach(id => {
     const el = document.getElementById(id);
-    if (el) data.dyn[id] = el.innerHTML;
+    if (!el) return;
+    el.querySelectorAll('input[type=checkbox]').forEach(cb => { cb.defaultChecked = cb.checked; });
+    el.querySelectorAll('input:not([type=checkbox])').forEach(inp => { inp.setAttribute('value', inp.value); });
+    el.querySelectorAll('textarea').forEach(ta => { ta.textContent = ta.value; });
+    data.dyn[id] = el.innerHTML;
   });
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch(e) {}
   showSaved();
