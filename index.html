@@ -1,0 +1,1160 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Isännöitsijäntodistus</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:#f0f2f5;color:#1a1a2e;min-height:100vh;padding:2rem 1rem}
+.container{max-width:860px;margin:0 auto}
+header{margin-bottom:2rem}
+header h1{font-size:1.75rem;font-weight:700;color:#0d3b66}
+header p{margin-top:.4rem;color:#555;font-size:.9rem}
+
+.card{background:#fff;border-radius:12px;padding:1.5rem 1.75rem;margin-bottom:1.25rem;box-shadow:0 1px 4px rgba(0,0,0,.08)}
+
+.sec-title{font-size:1rem;font-weight:700;color:#0d3b66;margin-bottom:1.25rem;padding-bottom:.6rem;border-bottom:2px solid #0d3b66;display:flex;align-items:center;gap:.5rem}
+.sec-num{background:#0d3b66;color:#fff;border-radius:5px;padding:.1rem .45rem;font-size:.8rem;font-weight:700;flex-shrink:0}
+.subsec{font-size:.82rem;font-weight:700;color:#0d3b66;margin:1.25rem 0 .75rem;padding:.35rem .6rem;background:#e8edf3;border-radius:6px}
+.field-label{font-size:.75rem;font-weight:600;color:#555;margin-bottom:.25rem;display:block}
+.field-label .unit{font-weight:400;color:#888}
+
+input[type=text],input[type=number],input[type=date],input[type=tel],textarea,select{
+  border:1.5px solid #d0d7e2;border-radius:6px;padding:.45rem .65rem;font-size:.85rem;
+  font-family:inherit;color:#1a1a2e;background:#fff;transition:border-color .15s;width:100%}
+input:focus,textarea:focus,select:focus{outline:none;border-color:#0d3b66;box-shadow:0 0 0 3px rgba(13,59,102,.1)}
+textarea{resize:vertical;min-height:64px}
+
+.g{display:grid;gap:.75rem}
+.g2{grid-template-columns:1fr 1fr}
+.g3{grid-template-columns:1fr 1fr 1fr}
+.g4{grid-template-columns:1fr 1fr 1fr 1fr}
+.mt{margin-top:.75rem}
+
+.cb-group{display:flex;flex-wrap:wrap;gap:.5rem .9rem;align-items:center;margin-top:.35rem}
+.cb-group label{display:flex;align-items:center;gap:.3rem;font-size:.85rem;font-weight:400;color:#333;cursor:pointer}
+.cb-group input[type=checkbox]{width:15px;height:15px;flex-shrink:0;cursor:pointer;accent-color:#0d3b66}
+.cb-inline{display:flex;align-items:center;gap:.35rem;font-size:.85rem;color:#333;cursor:pointer}
+.cb-inline input[type=checkbox]{width:15px;height:15px;accent-color:#0d3b66;flex-shrink:0}
+
+.dyn-container{display:flex;flex-direction:column;gap:.5rem;margin-bottom:.5rem}
+.dyn-row{display:flex;gap:.5rem;align-items:flex-start;background:#f7f9fc;border:1px solid #e2e8f0;border-radius:7px;padding:.5rem .6rem}
+.dyn-row input[type=text],.dyn-row input[type=number],.dyn-row textarea{flex:1;min-width:0}
+.dyn-row .narrow{flex:0 0 90px}
+.dyn-row .mid{flex:0 0 130px}
+.btn-rem{background:none;border:none;color:#c0392b;font-size:1.1rem;cursor:pointer;padding:.1rem .4rem;line-height:1;flex-shrink:0;margin-top:2px}
+.btn-rem:hover{color:#e74c3c}
+.btn-add{background:#e8edf3;border:1.5px dashed #a0aec0;border-radius:6px;padding:.4rem .9rem;font-size:.8rem;font-weight:600;color:#0d3b66;cursor:pointer;display:inline-flex;align-items:center;gap:.3rem;margin-top:.35rem}
+.btn-add:hover{background:#d8e0ec}
+
+.hallinta-row{display:flex;flex-wrap:wrap;gap:.6rem;align-items:center;margin-top:.5rem}
+.hallinta-row .f{display:flex;flex-direction:column;gap:.2rem}
+.hallinta-row .f label{font-size:.72rem;font-weight:600;color:#555}
+.hallinta-row .f input{width:140px}
+
+.actions{display:flex;gap:1rem;align-items:center}
+button.btn-primary{background:#0d3b66;color:#fff;border:none;border-radius:8px;padding:.7rem 2rem;font-family:inherit;font-size:.9rem;font-weight:600;cursor:pointer}
+button.btn-primary:hover{background:#0a2f52}
+button.btn-secondary{background:#e8edf3;color:#0d3b66;border:none;border-radius:8px;padding:.7rem 1.4rem;font-family:inherit;font-size:.9rem;font-weight:600;cursor:pointer}
+button.btn-secondary:hover{background:#d8e0ec}
+.status{font-size:.85rem;color:#2d7a4f;font-weight:600}
+
+.autopaikat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:.6rem}
+.num-row{display:flex;flex-direction:column;gap:.2rem}
+.hallinta-huoneistot table{border-collapse:collapse;width:100%;font-size:.85rem;margin-top:.4rem}
+.hallinta-huoneistot th{text-align:left;font-weight:600;color:#555;font-size:.75rem;padding:.3rem .5rem;border-bottom:1px solid #e2e8f0}
+.hallinta-huoneistot td{padding:.3rem .5rem}
+.hallinta-huoneistot td input{padding:.3rem .5rem;font-size:.82rem}
+
+@media(max-width:600px){.g2,.g3,.g4{grid-template-columns:1fr}.card{padding:1rem 1.1rem}}
+</style>
+</head>
+<body>
+<div class="container">
+<header>
+  <h1>Isännöitsijäntodistus</h1>
+  <p>Asunto-osakeyhtiölaki 1599/2009 · 7 luku 27 §</p>
+</header>
+<form id="form" novalidate>
+
+<!-- ===== 1. TODISTUKSEN KOHDE ===== -->
+<div class="card">
+  <div class="sec-title"><span class="sec-num">1</span>Todistuksen kohde</div>
+  <div class="g g2">
+    <div>
+      <label class="field-label">Yhtiön nimi ja kiinteistön sijaintiosoite</label>
+      <textarea id="s1_nimi_osoite" rows="2" placeholder="Asunto Oy Esimerkki&#10;Esimerkkikatu 1, 00100 Helsinki"></textarea>
+    </div>
+    <div>
+      <label class="field-label">Isännöitsijän tai hallituksen puheenjohtajan nimi ja osoite</label>
+      <textarea id="s1_isannoitsija_osoite" rows="2" placeholder="Nimi&#10;Osoite"></textarea>
+    </div>
+  </div>
+  <div class="g g3 mt">
+    <div>
+      <label class="field-label">Yritys- ja yhteisötunnus</label>
+      <input type="text" id="s1_ytunnus" placeholder="1234567-8"/>
+    </div>
+    <div>
+      <label class="field-label">Kaupparekisterimerkinnän pvm</label>
+      <input type="date" id="s1_kr_pvm"/>
+    </div>
+    <div>
+      <label class="field-label">Voimassa olevan yhtiöjärjestyksen rekisteröintipvm</label>
+      <input type="date" id="s1_yj_pvm"/>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 2. TIEDOT OSAKEHUONEISTOSTA ===== -->
+<div class="card">
+  <div class="sec-title"><span class="sec-num">2</span>Tiedot osakehuoneistosta</div>
+
+  <div class="g g3">
+    <div>
+      <label class="field-label">Osakkeiden numerot</label>
+      <input type="text" id="s2_osk_nrot" placeholder="345–402"/>
+    </div>
+    <div>
+      <label class="field-label">Osakkeiden lukumäärä</label>
+      <input type="number" id="s2_osk_lkm" placeholder="58"/>
+    </div>
+    <div>
+      <label class="field-label">Osakehuoneiston tunnus <span class="unit">(esim. 5 A 1)</span></label>
+      <input type="text" id="s2_tunnus" placeholder="5 A 1"/>
+    </div>
+  </div>
+
+  <div class="g g3 mt">
+    <div>
+      <label class="field-label">Porras <span class="unit">(esim. A)</span></label>
+      <input type="text" id="s2_porras" placeholder="A"/>
+    </div>
+    <div>
+      <label class="field-label">Kerros <span class="unit">(esim. 1)</span></label>
+      <input type="text" id="s2_kerros" placeholder="2"/>
+    </div>
+    <div>
+      <label class="field-label">Muut osakashallintaan kuuluvat tilat</label>
+      <input type="text" id="s2_muut_tilat" placeholder="Autotallipaikka A3"/>
+    </div>
+  </div>
+
+  <div class="g g2 mt">
+    <div>
+      <label class="field-label">Yhtiöjärjestyksen mukainen huoneluku <span class="unit">(esim. 2 h + k)</span></label>
+      <input type="text" id="s2_yj_huoneluku" placeholder="2 h + k"/>
+    </div>
+    <div>
+      <label class="field-label">Osakkaan ilmoittama huoneluku</label>
+      <input type="text" id="s2_osakas_huoneluku" placeholder="2 h + k"/>
+    </div>
+  </div>
+
+  <div class="g g2 mt">
+    <div>
+      <label class="field-label">Rakennusluvan mukainen käyttötarkoitus</label>
+      <input type="text" id="s2_rak_kaytto" placeholder="Asuinhuoneisto"/>
+    </div>
+    <div>
+      <label class="field-label">Yhtiöjärjestyksen mukainen käyttötarkoitus</label>
+      <input type="text" id="s2_yj_kaytto" placeholder="Asuinhuoneisto"/>
+    </div>
+  </div>
+
+  <div class="g g2 mt">
+    <div>
+      <label class="field-label">Yhtiöjärjestyksen mukainen pinta-ala <span class="unit">m²</span></label>
+      <input type="number" id="s2_yj_ala" placeholder="58.5" step="0.01"/>
+    </div>
+    <div>
+      <label class="field-label">Standardin SFS 5139 mukaan tarkistusmitattu pinta-ala <span class="unit">m²</span> (jos tiedossa)</label>
+      <input type="number" id="s2_sfs_ala" placeholder="57.8" step="0.01"/>
+    </div>
+  </div>
+
+  <div class="g g2 mt">
+    <div>
+      <label class="field-label">Osakeluetteloon merkitty omistaja</label>
+      <input type="text" id="s2_omistaja" placeholder="Etunimi Sukunimi"/>
+    </div>
+    <div>
+      <label class="field-label">Merkintäpvm</label>
+      <input type="date" id="s2_merkinta_pvm"/>
+    </div>
+  </div>
+
+  <!-- Lunastuslauseke -->
+  <div class="mt">
+    <label class="field-label">Yhtiöjärjestyksen lunastuslausekkeen mukaan lunastusoikeus osakkeisiin</label>
+    <div class="cb-group">
+      <label><input type="checkbox" id="s2_lun_yhtio"> Yhtiöllä</label>
+      <label><input type="checkbox" id="s2_lun_osakkaat"> Osakkailla</label>
+      <label><input type="checkbox" id="s2_lun_muu"> Muulla</label>
+      <input type="text" id="s2_lun_muu_txt" style="width:180px" placeholder="Kenellä?"/>
+    </div>
+  </div>
+
+  <!-- Käyttö-/luovutusrajoitus -->
+  <div class="mt">
+    <label class="field-label">Muu käyttö- tai luovutusrajoitus</label>
+    <div class="cb-group">
+      <label><input type="checkbox" id="s2_raj_kunta"> Kunnalla</label>
+      <label><input type="checkbox" id="s2_raj_hitas"> Hitas</label>
+      <label><input type="checkbox" id="s2_raj_leski"> Lesken hallintaoikeus</label>
+      <label><input type="checkbox" id="s2_raj_muu"> Muu</label>
+    </div>
+  </div>
+
+  <!-- Hallintaanotto -->
+  <div class="mt">
+    <label class="cb-inline"><input type="checkbox" id="s2_hallinta_cb"> Huoneisto päätetty ottaa yhtiön hallintaan</label>
+    <div class="hallinta-row">
+      <div class="f"><label>Päätöspvm</label><input type="date" id="s2_hallinta_paatos"/></div>
+      <div class="f"><label>Hallintaanotto mistä</label><input type="date" id="s2_hallinta_mista"/></div>
+      <div class="f"><label>Hallintaanotto mihin</label><input type="date" id="s2_hallinta_mihin"/></div>
+    </div>
+  </div>
+
+  <!-- Vuokrannut -->
+  <div class="mt">
+    <label class="field-label">Yhtiö vuokrannut huoneiston</label>
+    <div class="cb-group">
+      <label><input type="checkbox" id="s2_vuokra_kylla"> Kyllä</label>
+      <label><input type="checkbox" id="s2_vuokra_ei"> Ei</label>
+    </div>
+  </div>
+
+  <!-- Osakkaan kunnossapitotyöt -->
+  <div class="mt">
+    <div class="subsec">Osakkaan suorittamat kunnossapito- ja muutostyöt</div>
+    <div class="dyn-container" id="dyn-osakas-tyot"></div>
+    <button type="button" class="btn-add" onclick="addRow('dyn-osakas-tyot','osakastyot')">+ Lisää rivi</button>
+  </div>
+
+  <!-- Yhtiön kunnossapitotyöt -->
+  <div class="mt">
+    <div class="subsec">Yhtiön huoneistossa suorittamat olennaiset kunnossapito- ja muutostyöt ja niiden suoritusajankohdat</div>
+    <div class="dyn-container" id="dyn-yhtio-tyot"></div>
+    <button type="button" class="btn-add" onclick="addRow('dyn-yhtio-tyot','osakastyot')">+ Lisää rivi</button>
+  </div>
+
+  <!-- Kunnossapitovastuu -->
+  <div class="mt">
+    <div class="subsec">Huoneiston kunnossapitovastuuta koskevat yhtiöjärjestysmääräykset, yhtiökokouspäätökset ja sopimukset</div>
+    <div class="dyn-container" id="dyn-kunnossapitovastuu"></div>
+    <button type="button" class="btn-add" onclick="addRow('dyn-kunnossapitovastuu','simpletextarea')">+ Lisää rivi</button>
+  </div>
+
+  <!-- Viat ja puutteet -->
+  <div class="mt">
+    <div class="subsec">Yhtiön tiedossa olevat huoneiston olennaiset viat ja puutteet</div>
+    <div class="dyn-container" id="dyn-viat"></div>
+    <button type="button" class="btn-add" onclick="addRow('dyn-viat','vika')">+ Lisää rivi</button>
+  </div>
+</div>
+
+<!-- ===== 3. TIEDOT YHTIÖN TALOUDESTA ===== -->
+<div class="card">
+  <div class="sec-title"><span class="sec-num">3</span>Tiedot yhtiön taloudesta</div>
+
+  <!-- 3.1 Huoneisto -->
+  <div class="subsec">3.1 Huoneisto</div>
+
+  <div class="g g2">
+    <div>
+      <label class="field-label">Hoitovastike <span class="unit">€/kk</span></label>
+      <input type="number" id="s31_hoito" step="0.01" placeholder="250.00"/>
+    </div>
+    <div>
+      <label class="field-label">Vastikeperuste</label>
+      <input type="text" id="s31_vastikeperuste" placeholder="esim. pinta-ala m²"/>
+    </div>
+  </div>
+
+  <div class="mt">
+    <div class="subsec" style="margin-top:.5rem">Pääomavastike/-vastikkeet ja lainaosuudet</div>
+    <div class="dyn-container" id="dyn-paaomavastike"></div>
+    <button type="button" class="btn-add" onclick="addRow('dyn-paaomavastike','paaomavastike')">+ Lisää rivi</button>
+  </div>
+
+  <div class="mt">
+    <div class="subsec">Muut vastikkeet ja niiden perusteet</div>
+    <div class="dyn-container" id="dyn-muutvastikkeet"></div>
+    <button type="button" class="btn-add" onclick="addRow('dyn-muutvastikkeet','muutvastikkeet')">+ Lisää rivi</button>
+  </div>
+
+  <div class="mt">
+    <div class="subsec">Muut maksut (käyttökorvaukset) ja niiden perusteet</div>
+    <div class="dyn-container" id="dyn-muutmaksut"></div>
+    <button type="button" class="btn-add" onclick="addRow('dyn-muutmaksut','muutmaksut')">+ Lisää rivi</button>
+  </div>
+
+  <div class="mt">
+    <div class="subsec">Osuus yhtiön hoitovastikkeella katettavista hoitolainoista</div>
+    <div class="dyn-container" id="dyn-hoitolainat"></div>
+    <button type="button" class="btn-add" onclick="addRow('dyn-hoitolainat','lainaosuus')">+ Lisää rivi</button>
+  </div>
+
+  <div class="mt">
+    <div class="subsec">Yhtiön nostamattomat lainat ja osuus niistä, jos tiedossa</div>
+    <div class="dyn-container" id="dyn-nostamattomat31"></div>
+    <button type="button" class="btn-add" onclick="addRow('dyn-nostamattomat31','lainaosuus')">+ Lisää rivi</button>
+  </div>
+
+  <div class="mt">
+    <label class="field-label">Huoneiston osalta on hakeuduttu arvonlisäverovelvolliseksi</label>
+    <div class="cb-group">
+      <label><input type="checkbox" id="s31_alv_ei"> Ei</label>
+      <label><input type="checkbox" id="s31_alv_kylla"> Kyllä</label>
+    </div>
+  </div>
+
+  <div class="mt">
+    <div class="subsec">Osakkaan erääntyneet ja maksamatta olevat vastikkeet, määrä</div>
+    <div class="dyn-container" id="dyn-eraantyneet-vast"></div>
+    <button type="button" class="btn-add" onclick="addRow('dyn-eraantyneet-vast','eraantynyt')">+ Lisää rivi</button>
+  </div>
+
+  <div class="mt">
+    <div class="subsec">Osakkaan erääntyneet ja maksamatta olevat muut maksut (yhtiöjärjestyksen mukaan rinnastetaan vastikkeeseen), määrä</div>
+    <div class="dyn-container" id="dyn-eraantyneet-maksut"></div>
+    <button type="button" class="btn-add" onclick="addRow('dyn-eraantyneet-maksut','eraantynyt')">+ Lisää rivi</button>
+  </div>
+
+  <!-- 3.2 Yhtiö -->
+  <div class="subsec" style="margin-top:1.5rem">3.2 Yhtiö</div>
+
+  <div class="mt">
+    <div class="subsec">Yhtiön pääoma- ja hoitolainat</div>
+    <div class="dyn-container" id="dyn-yhtiolainat"></div>
+    <button type="button" class="btn-add" onclick="addRow('dyn-yhtiolainat','yhtiolaina')">+ Lisää rivi</button>
+  </div>
+
+  <div class="mt">
+    <div class="subsec">Yhtiön luotolliset tilit (limiitin määrä ja siitä käytössä, pvm)</div>
+    <div class="dyn-container" id="dyn-luotolliset"></div>
+    <button type="button" class="btn-add" onclick="addRow('dyn-luotolliset','luotollinen')">+ Lisää rivi</button>
+  </div>
+
+  <div class="mt">
+    <label class="field-label">Yhtiön nostamattomat lainat käyttötarkoituksittain ja poismaksumahdollisuuksineen ja arvio lainannostoajankohdasta</label>
+    <textarea id="s32_nostamattomat" rows="3" placeholder="Kuvaus…"></textarea>
+  </div>
+
+  <div class="g g2 mt">
+    <div>
+      <label class="field-label">Vastikkeen suuruudesta ja maksutavasta päättävä taho</label>
+      <input type="text" id="s32_paattava_taho" placeholder="esim. yhtiökokous"/>
+    </div>
+    <div>
+      <label class="field-label">Yhtiö on hakeutunut arvonlisäverovelvolliseksi</label>
+      <div class="cb-group" style="margin-top:.5rem">
+        <label><input type="checkbox" id="s32_alv_ei"> Ei</label>
+        <label><input type="checkbox" id="s32_alv_kylla"> Kyllä</label>
+        <label><input type="checkbox" id="s32_alv_osittain"> Osittain</label>
+      </div>
+    </div>
+  </div>
+
+  <div class="mt">
+    <div class="subsec">Kiinnitykset, kokonaismäärä</div>
+    <div class="dyn-container" id="dyn-kiinnitykset"></div>
+    <button type="button" class="btn-add" onclick="addRow('dyn-kiinnitykset','kiinnitys')">+ Lisää rivi</button>
+  </div>
+
+  <div class="g g2 mt">
+    <div>
+      <label class="field-label">Vakuutukset</label>
+      <div class="cb-group" style="margin-top:.35rem">
+        <label><input type="checkbox" id="s32_vak_taysi"> Täysarvovakuutus</label>
+        <label><input type="checkbox" id="s32_vak_muu"> Muu, mikä:</label>
+        <input type="text" id="s32_vak_muu_txt" style="width:160px" placeholder="Vakuutuksen nimi"/>
+      </div>
+    </div>
+    <div>
+      <label class="field-label">Vakuutusyhtiö</label>
+      <input type="text" id="s32_vakuutusyhtio" placeholder="Vakuutusyhtiö Oy"/>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 4. TIEDOT KIINTEISTÖSTÄ JA RAKENNUKSESTA ===== -->
+<div class="card">
+  <div class="sec-title"><span class="sec-num">4</span>Tiedot kiinteistöstä ja rakennuksesta</div>
+
+  <!-- Asunnot -->
+  <div class="g g3">
+    <div><label class="field-label">Asuntojen lkm</label><input type="number" id="s4_asunnot_lkm" placeholder="24"/></div>
+    <div><label class="field-label">Asuinhuoneisto-osakkeiden lkm</label><input type="number" id="s4_asosk_lkm" placeholder="24"/></div>
+    <div><label class="field-label">Asuinhuoneistojen pinta-ala <span class="unit">m²</span></label><input type="number" id="s4_as_ala" step="0.01" placeholder="1200"/></div>
+  </div>
+
+  <div class="g g2 mt">
+    <div><label class="field-label">Liike- ja muiden huoneistojen lkm</label><input type="number" id="s4_liike_lkm" placeholder="2"/></div>
+    <div><label class="field-label">Liike- ja muiden huoneistojen pinta-ala <span class="unit">m²</span></label><input type="number" id="s4_liike_ala" step="0.01" placeholder="250"/></div>
+  </div>
+
+  <!-- Yhtiön hallinnassa olevat huoneistot -->
+  <div class="mt">
+    <label class="field-label">Yhtiön hallinnassa olevat huoneistot</label>
+    <div class="hallinta-huoneistot">
+      <table>
+        <thead><tr><th>Tyyppi</th><th>kpl</th><th>m²</th></tr></thead>
+        <tbody>
+          <tr><td>Asuntoja</td><td><input type="number" id="s4_hall_as_kpl" placeholder="0"/></td><td><input type="number" id="s4_hall_as_ala" step="0.01" placeholder="0"/></td></tr>
+          <tr><td>Liikehuoneistoja</td><td><input type="number" id="s4_hall_liike_kpl" placeholder="0"/></td><td><input type="number" id="s4_hall_liike_ala" step="0.01" placeholder="0"/></td></tr>
+          <tr><td>Muita</td><td><input type="number" id="s4_hall_muita_kpl" placeholder="0"/></td><td><input type="number" id="s4_hall_muita_ala" step="0.01" placeholder="0"/></td></tr>
+          <tr><td><strong>Yhteensä</strong></td><td><input type="number" id="s4_hall_yht_kpl" placeholder="0"/></td><td><input type="number" id="s4_hall_yht_ala" step="0.01" placeholder="0"/></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Autopaikat -->
+  <div class="subsec mt">Autopaikat</div>
+  <div class="autopaikat-grid">
+    <div class="num-row"><label class="field-label">Kaavan mukainen autopaikkamäärä</label><input type="number" id="s4_ap_kaava" placeholder="0"/></div>
+    <div class="num-row"><label class="field-label">Toteutetut autopaikat</label><input type="number" id="s4_ap_tot" placeholder="0"/></div>
+    <div class="num-row"><label class="field-label">Autotalli-/hallipaikat</label><input type="number" id="s4_ap_talli" placeholder="0"/></div>
+    <div class="num-row"><label class="field-label">Autokatospaikat</label><input type="number" id="s4_ap_katos" placeholder="0"/></div>
+    <div class="num-row"><label class="field-label">Muut – sähkötolpalliset</label><input type="number" id="s4_ap_sahko" placeholder="0"/></div>
+    <div class="num-row"><label class="field-label">Muut – muut</label><input type="number" id="s4_ap_muut" placeholder="0"/></div>
+    <div class="num-row"><label class="field-label">Näistä osakkeina</label><input type="number" id="s4_ap_osakkeet" placeholder="0"/></div>
+    <div class="num-row"><label class="field-label">Yhtiön hallinnassa</label><input type="number" id="s4_ap_hallinta" placeholder="0"/></div>
+  </div>
+
+  <!-- Säilytystilat -->
+  <div class="mt">
+    <label class="field-label">Säilytystilat</label>
+    <div class="cb-group">
+      <label><input type="checkbox" id="s4_sai_ullakko"> Ullakko-/kellarikomero</label>
+      <label><input type="checkbox" id="s4_sai_kylma"> Kylmäsäilytystilat</label>
+      <label><input type="checkbox" id="s4_sai_muu"> Muu säilytystila:</label>
+      <input type="text" id="s4_sai_muu_txt" style="width:180px" placeholder="Mikä?"/>
+    </div>
+  </div>
+
+  <!-- Yhteiset tilat -->
+  <div class="mt">
+    <label class="field-label">Yhteiset tilat</label>
+    <div class="cb-group">
+      <label><input type="checkbox" id="s4_yt_sauna"> Sauna</label>
+      <label><input type="checkbox" id="s4_yt_pesu"> Pesutupa</label>
+      <label><input type="checkbox" id="s4_yt_kuivaus"> Kuivaushuone</label>
+      <label><input type="checkbox" id="s4_yt_mankeli"> Mankeli</label>
+      <label><input type="checkbox" id="s4_yt_kerho"> Kerhohuone</label>
+      <label><input type="checkbox" id="s4_yt_askar"> Askarteluhuone</label>
+      <label><input type="checkbox" id="s4_yt_ulkovar"> Ulkovälinevarasto</label>
+      <label><input type="checkbox" id="s4_yt_vaesto"> Väestönsuojat</label>
+      <label><input type="checkbox" id="s4_yt_uima"> Uima-allas</label>
+    </div>
+  </div>
+
+  <!-- Kiinteistö -->
+  <div class="subsec mt">Kiinteistö</div>
+  <div class="g g3">
+    <div><label class="field-label">Kiinteistötunnus</label><input type="text" id="s4_kiint_tunnus" placeholder="091-001-0001-0001"/></div>
+    <div><label class="field-label">Kiinteistön pinta-ala <span class="unit">m²</span></label><input type="number" id="s4_kiint_ala" step="0.01" placeholder="3500"/></div>
+    <div><label class="field-label">Käyttämätön rakennusoikeus <span class="unit">m²</span></label><input type="number" id="s4_raken_oikeus" step="0.01" placeholder="0"/></div>
+  </div>
+
+  <div class="mt">
+    <label class="field-label">Tontti</label>
+    <div class="cb-group">
+      <label><input type="checkbox" id="s4_tontti_oma"> Oma tontti</label>
+      <label><input type="checkbox" id="s4_tontti_vuokra"> Vuokratontti</label>
+    </div>
+  </div>
+
+  <div class="g g3 mt">
+    <div><label class="field-label">Vuosivuokra <span class="unit">€</span></label><input type="number" id="s4_vuosivuokra" step="0.01" placeholder="12000"/></div>
+    <div>
+      <label class="field-label">Vuokran tarkistuspiste</label>
+      <div class="cb-group" style="margin-top:.35rem">
+        <label><input type="checkbox" id="s4_tarkistus_indeksi"> Indeksi</label>
+        <label><input type="checkbox" id="s4_tarkistus_muu"> Muu</label>
+      </div>
+    </div>
+    <div><label class="field-label">Vuokranantaja</label><input type="text" id="s4_vuokranantaja" placeholder="Helsinki"/></div>
+  </div>
+
+  <div class="g g3 mt">
+    <div><label class="field-label">Vuokra-aika päättyy</label><input type="date" id="s4_vuokra_paattyy"/></div>
+    <div>
+      <label class="field-label">Tontin lunastusoikeus</label>
+      <div class="cb-group" style="margin-top:.35rem">
+        <label><input type="checkbox" id="s4_lun_yhtio"> Yhtiöllä</label>
+        <label><input type="checkbox" id="s4_lun_osakas"> Osakkaalla</label>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:.5rem;padding-top:1.3rem">
+      <label class="cb-inline"><input type="checkbox" id="s4_lun_kaytetty"> Lunastusoikeutta käytetty</label>
+      <label class="cb-inline"><input type="checkbox" id="s4_eri_vastuu"> Huoneistoilla erilainen tontinvuokranmaksamisvastuu</label>
+    </div>
+  </div>
+
+  <!-- Rakennus -->
+  <div class="subsec mt">Rakennus</div>
+  <div class="g g3">
+    <div><label class="field-label">Rakennusten lukumäärä</label><input type="number" id="s4_rak_lkm" placeholder="1"/></div>
+    <div><label class="field-label">Rakennusten käyttöönottovuosi/-det</label><input type="text" id="s4_kayttovuosi" placeholder="1985"/></div>
+    <div><label class="field-label">Rakentaja / rakennusliike</label><input type="text" id="s4_rakentaja" placeholder="Rakennusliike Oy"/></div>
+  </div>
+  <div class="g g2 mt">
+    <div><label class="field-label">Talotyyppi</label><input type="text" id="s4_talotyyppi" placeholder="Kerrostalo"/></div>
+    <div><label class="field-label">Kattotyyppi</label><input type="text" id="s4_kattotyyppi" placeholder="Tasakatto"/></div>
+  </div>
+  <div class="g g2 mt">
+    <div><label class="field-label">Pääasiallinen rakennusmateriaali</label><input type="text" id="s4_rakmat" placeholder="Betoni"/></div>
+    <div><label class="field-label">Katemateriaali</label><input type="text" id="s4_katemat" placeholder="Huopa"/></div>
+  </div>
+  <div class="g g2 mt">
+    <div><label class="field-label">Lämmitys- ja mahdollinen jäähdytysjärjestelmä</label><input type="text" id="s4_lammitys" placeholder="Kaukolämpö"/></div>
+    <div><label class="field-label">Ilmanvaihtojärjestelmä</label><input type="text" id="s4_ilmanvaihto" placeholder="Koneellinen poistoilma"/></div>
+  </div>
+
+  <div class="mt">
+    <label class="field-label">Antennijärjestelmä</label>
+    <div class="cb-group">
+      <label><input type="checkbox" id="s4_ant_yhteis"> Yhteisantenni</label>
+      <label><input type="checkbox" id="s4_ant_kaapeli"> Kaapeli-TV</label>
+      <label><input type="checkbox" id="s4_ant_satelliitti"> Satelliittiantenni</label>
+    </div>
+  </div>
+
+  <div class="mt">
+    <label class="field-label">Tietoliikennejärjestelmä</label>
+    <div class="cb-group">
+      <label><input type="checkbox" id="s4_tl_puhelin"> Puhelinverkko</label>
+      <label><input type="checkbox" id="s4_tl_kaapeli"> Yleiskaapelointi</label>
+      <label><input type="checkbox" id="s4_tl_valo"> Valokaapeli</label>
+      <label><input type="checkbox" id="s4_tl_muu"> Muu</label>
+    </div>
+  </div>
+
+  <!-- Tekniset tiedot -->
+  <div class="subsec mt">Tekniset tiedot</div>
+  <div class="g g3">
+    <div><label class="field-label">Hissien lukumäärä</label><input type="number" id="s4_hissit" placeholder="1"/></div>
+    <div><label class="field-label">Tilavuus <span class="unit">m³</span></label><input type="number" id="s4_tilavuus" step="0.01" placeholder="6000"/></div>
+    <div><label class="field-label">Kerrosala <span class="unit">m²</span></label><input type="number" id="s4_kerrosala" step="0.01" placeholder="1450"/></div>
+  </div>
+  <div class="g g3 mt">
+    <div><label class="field-label">Kerrosten lukumäärä</label><input type="number" id="s4_kerrokset" placeholder="5"/></div>
+    <div><label class="field-label">Porrashuoneiden lukumäärä</label><input type="number" id="s4_portaat" placeholder="2"/></div>
+  </div>
+  <div class="g g3 mt">
+    <div><label class="field-label">Lämmönkulutus <span class="unit">kWh/m³/v</span></label><input type="number" id="s4_lammitys_kwh" step="0.01" placeholder="45"/></div>
+    <div><label class="field-label">Sähkönkulutus <span class="unit">kWh/m³/v</span></label><input type="number" id="s4_sahko_kwh" step="0.01" placeholder="8"/></div>
+    <div><label class="field-label">Vedenkulutus <span class="unit">l/as/vrk</span></label><input type="number" id="s4_vesi" step="0.01" placeholder="130"/></div>
+  </div>
+
+  <!-- Yhteisomistus -->
+  <div class="mt">
+    <label class="field-label">Tontin ja rakennusten yhteisomistus, muut yhteisomistajat, omistusosuudet, yhteisomistusehdot ja hallinnanjaon rekisteröintitiedot</label>
+    <textarea id="s4_yhteisomistus" rows="3" placeholder="Kuvaus…"></textarea>
+  </div>
+
+  <!-- Hallituksen selvitykset -->
+  <div class="mt">
+    <label class="cb-inline">
+      <input type="checkbox" id="s4_hall_selvitys_tyot_cb">
+      Hallituksen selvitys suoritetuista kunnossapito- ja muutostöistä valmistumisajankohtineen esitetty yhtiökokouksessa pvm
+    </label>
+    <input type="text" id="s4_hall_selvitys_tyot_pvm" style="width:120px;margin-top:.4rem;display:block" placeholder="vuosi"/>
+  </div>
+  <div class="mt">
+    <label class="cb-inline">
+      <input type="checkbox" id="s4_hall_selvitys_tarve_cb">
+      Hallituksen selvitys kunnossapitotarpeesta esitetty yhtiökokouksessa pvm
+    </label>
+    <input type="text" id="s4_hall_selvitys_tarve_pvm" style="width:120px;margin-top:.4rem;display:block" placeholder="vuosi"/>
+  </div>
+
+  <div class="mt">
+    <label class="field-label">Yhtiökokouksen hyväksymä kunnossapitosuunnitelma, esim. PTS</label>
+    <div class="cb-group">
+      <label><input type="checkbox" id="s4_pts_on"> On</label>
+      <label><input type="checkbox" id="s4_pts_ei"> Ei</label>
+    </div>
+  </div>
+
+  <!-- Dynaamiset: korjaukset -->
+  <div class="mt">
+    <div class="subsec">Tehdyt kuntoarviot ja -tutkimukset tai muut selvitykset</div>
+    <div class="dyn-container" id="dyn-kuntoarviot"></div>
+    <button type="button" class="btn-add" onclick="addRow('dyn-kuntoarviot','korjaus')">+ Lisää rivi</button>
+  </div>
+  <div class="mt">
+    <div class="subsec">Päätetyt korjaus- ja muutostyöt</div>
+    <div class="dyn-container" id="dyn-paatetyt"></div>
+    <button type="button" class="btn-add" onclick="addRow('dyn-paatetyt','korjaus')">+ Lisää rivi</button>
+  </div>
+  <div class="mt">
+    <div class="subsec">Hallituksen ehdottamat korjaukset</div>
+    <div class="dyn-container" id="dyn-hall-ehdotukset"></div>
+    <button type="button" class="btn-add" onclick="addRow('dyn-hall-ehdotukset','korjaus')">+ Lisää rivi</button>
+  </div>
+  <div class="mt">
+    <div class="subsec">Yhtiökokouksen jälkeen ilmenneet korjaustarpeet</div>
+    <div class="dyn-container" id="dyn-kokous-korjaukset"></div>
+    <button type="button" class="btn-add" onclick="addRow('dyn-kokous-korjaukset','simpletextarea')">+ Lisää kenttä</button>
+  </div>
+</div>
+
+<!-- ===== 5. MUUT TIEDOT ===== -->
+<div class="card">
+  <div class="sec-title"><span class="sec-num">5</span>Muut tiedot</div>
+
+  <div class="g g2">
+    <div>
+      <label class="field-label">Isännöinti</label>
+      <div class="cb-group">
+        <label><input type="checkbox" id="s5_isan_yritys"> Isännöintiyritys</label>
+        <label><input type="checkbox" id="s5_isan_oma"> Omatoiminen</label>
+        <label><input type="checkbox" id="s5_isan_ei"> Ei ole</label>
+      </div>
+    </div>
+    <div>
+      <label class="field-label">Kiinteistönhoidon organisointi</label>
+      <div class="cb-group">
+        <label><input type="checkbox" id="s5_kh_yritys"> Kiinteistöpalveluyritys</label>
+        <label><input type="checkbox" id="s5_kh_talonmies"> Talonmies</label>
+        <label><input type="checkbox" id="s5_kh_oma"> Omatoiminen</label>
+      </div>
+    </div>
+  </div>
+
+  <div class="subsec mt">Sähköinen osakehuoneistorekisteri</div>
+  <div class="g g2">
+    <div>
+      <label class="field-label">Yhtiön osakkeet kuuluvat osakehuoneistorekisteriin</label>
+      <div class="cb-group">
+        <label><input type="checkbox" id="s5_osk_rek_kylla"> Kyllä</label>
+        <label><input type="checkbox" id="s5_osk_rek_ei"> Ei</label>
+      </div>
+    </div>
+    <div>
+      <label class="field-label">Tämän todistuksen osakeryhmä kuuluu osakehuoneistorekisteriin</label>
+      <div class="cb-group">
+        <label><input type="checkbox" id="s5_osk_ryh_kylla"> Kyllä</label>
+        <label><input type="checkbox" id="s5_osk_ryh_ei"> Ei</label>
+      </div>
+    </div>
+  </div>
+
+  <div class="mt" style="display:flex;flex-direction:column;gap:.55rem">
+    <label class="cb-inline"><input type="checkbox" id="s5_turvapaino"> Osakekirjat on painettava turvapainossa</label>
+    <label class="cb-inline"><input type="checkbox" id="s5_vahemmisto"> Vähemmistöosakkeiden poislunastusoikeus – Osakas</label>
+    <label class="cb-inline"><input type="checkbox" id="s5_energia"> Rakennuksella on energiatodistuslain mukainen voimassa oleva energiatodistus</label>
+    <label class="cb-inline"><input type="checkbox" id="s5_asbesti"> Rakennuksessa on teetetty yhtiön toimesta asbestikartoitus</label>
+    <label class="cb-inline"><input type="checkbox" id="s5_jarjestys"> Yhtiöllä on voimassa olevat järjestyssäännöt</label>
+    <label class="cb-inline"><input type="checkbox" id="s5_tupakki_paatos"> Yhtiössä on päätetty tupakointikiellosta</label>
+    <label class="cb-inline"><input type="checkbox" id="s5_tupakki_maarays"> Kunnan terveydensuojeluviranomainen on määrännyt huoneistoa ja/tai sen parveketta tai pihaa koskevan tupakointikiellon</label>
+    <label class="cb-inline"><input type="checkbox" id="s5_tupakki_hakemus"> Yhtiökokous on päättänyt hakea huoneistoa ja/tai sen parveketta tai pihaa koskevaa tupakointikieltoa kunnan terveydensuojeluviranomaiselta</label>
+    <label class="cb-inline"><input type="checkbox" id="s5_apaikat_saannot"> Yhtiön hallinnassa olevat autopaikat jaetaan yhtiössä vahvistettujen autopaikkasääntöjen mukaisesti</label>
+  </div>
+
+  <div class="mt">
+    <label class="field-label">Osakeanti-, optio- ym. oikeuden antamisvaltuustiedot</label>
+    <textarea id="s5_osakeanti" rows="2" placeholder="Kuvaus…"></textarea>
+  </div>
+  <div class="mt">
+    <label class="field-label">Yhtiöjärjestyksen kohtuuttomuutta koskeva ym. kanne. Yhtiön tiedossa olevat seikat, joilla voi olla olennainen vaikutus talouteen tai toimintaan</label>
+    <textarea id="s5_kanne" rows="2" placeholder="Kuvaus…"></textarea>
+  </div>
+
+  <div class="g g2 mt">
+    <div>
+      <label class="field-label">Isännöitsijäntodistuksen tilaaja – nimi</label>
+      <input type="text" id="s5_tilaaja_nimi" placeholder="Etunimi Sukunimi"/>
+    </div>
+    <div>
+      <label class="field-label">Isännöitsijäntodistuksen tilaaja – puhelinnumero</label>
+      <input type="tel" id="s5_tilaaja_puh" placeholder="+358 40 123 4567"/>
+    </div>
+  </div>
+  <div class="g g2 mt">
+    <div>
+      <label class="field-label">Yhtiön edustaja – nimenselvennys</label>
+      <input type="text" id="s5_edustaja_nimi" placeholder="Etunimi Sukunimi"/>
+    </div>
+    <div>
+      <label class="field-label">Yhtiön edustaja – puhelinnumero</label>
+      <input type="tel" id="s5_edustaja_puh" placeholder="+358 40 123 4567"/>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 6. LIITTEET ===== -->
+<div class="card">
+  <div class="sec-title"><span class="sec-num">6</span>Liitteet</div>
+  <div class="cb-group" style="flex-direction:column;align-items:flex-start;gap:.5rem">
+    <label><input type="checkbox" id="s6_tilinpaatos"> Tilinpäätös</label>
+    <label><input type="checkbox" id="s6_toimintakertomus"> Toimintakertomus</label>
+    <label><input type="checkbox" id="s6_talousarvio"> Talousarvio</label>
+    <label><input type="checkbox" id="s6_tilintarkastus"> Tilintarkastuskertomus</label>
+    <label><input type="checkbox" id="s6_toiminnantarkastus"> Toiminnantarkastuskertomus</label>
+    <label><input type="checkbox" id="s6_hall_tyot"> Hallituksen selvitys suoritetuista kunnossapito- ja muutostöistä</label>
+    <label><input type="checkbox" id="s6_hall_tarve"> Hallituksen selvitys kunnossapitotarpeesta</label>
+    <label><input type="checkbox" id="s6_energia"> Energiatodistus</label>
+    <label><input type="checkbox" id="s6_jarjestyssaannot"> Järjestyssäännöt</label>
+    <label><input type="checkbox" id="s6_yhtiojarjestys"> Yhtiöjärjestys</label>
+  </div>
+</div>
+
+<!-- ACTIONS -->
+<div class="card">
+  <div class="actions">
+    <button type="button" class="btn-primary" onclick="generatePDF()">Luo PDF</button>
+    <button type="button" class="btn-secondary" onclick="clearForm()">Tyhjennä lomake</button>
+    <span class="status" id="status"></span>
+  </div>
+</div>
+</form>
+</div>
+
+<script>
+// ─── Dynamic row templates ────────────────────────────────────────────────────
+const T = {
+  osakastyot: () => `
+    <input type="text" placeholder="Työ / muutos" style="flex:2"/>
+    <input type="text" placeholder="Suoritusajankohta" style="flex:0 0 150px"/>`,
+
+  vika: () => `
+    <input type="text" placeholder="Vika / puute" style="flex:3"/>
+    <input type="text" placeholder="Sijainti / lisätieto" style="flex:1"/>`,
+
+  simpletextarea: () => `
+    <textarea placeholder="Kuvaus…" rows="2" style="flex:1"></textarea>`,
+
+  paaomavastike: () => `
+    <input type="number" placeholder="€/kk" step="0.01" class="narrow"/>
+    <input type="text" placeholder="€/vastikeperuste" class="mid"/>
+    <input type="text" placeholder="Käyttötarkoitus" style="flex:2"/>
+    <input type="number" placeholder="Lainaosuus €" step="0.01" class="mid"/>`,
+
+  muutvastikkeet: () => `
+    <input type="text" placeholder="Vastike / peruste" style="flex:3"/>
+    <input type="number" placeholder="€/kk" step="0.01" class="narrow"/>`,
+
+  muutmaksut: () => `
+    <input type="text" placeholder="Maksu / peruste" style="flex:3"/>
+    <input type="number" placeholder="€/kk" step="0.01" class="narrow"/>
+    <label style="display:flex;align-items:center;gap:.3rem;font-size:.78rem;white-space:nowrap;flex-shrink:0">
+      <input type="checkbox" style="width:14px;height:14px;flex-shrink:0"> rinnastetaan vastikkeeseen
+    </label>`,
+
+  lainaosuus: () => `
+    <input type="text" placeholder="Lainan kuvaus" style="flex:3"/>
+    <input type="number" placeholder="Osuus €" step="0.01" class="mid"/>`,
+
+  eraantynyt: () => `
+    <input type="text" placeholder="Kuvaus" style="flex:3"/>
+    <input type="number" placeholder="Määrä €" step="0.01" class="mid"/>`,
+
+  yhtiolaina: () => `
+    <input type="number" placeholder="Määrä €" step="0.01" class="mid"/>
+    <input type="text" placeholder="Käyttötarkoitus" style="flex:3"/>
+    <label style="display:flex;align-items:center;gap:.25rem;font-size:.78rem;white-space:nowrap;flex-shrink:0">
+      <input type="checkbox" style="width:14px;height:14px"> On
+    </label>
+    <label style="display:flex;align-items:center;gap:.25rem;font-size:.78rem;white-space:nowrap;flex-shrink:0">
+      <input type="checkbox" style="width:14px;height:14px"> Ei
+    </label>
+    <span style="font-size:.72rem;color:#555;white-space:nowrap;align-self:center">poismaksettavissa</span>`,
+
+  luotollinen: () => `
+    <input type="text" placeholder="Tilin kuvaus" style="flex:2"/>
+    <input type="number" placeholder="Limiitti €" step="0.01" class="mid"/>
+    <input type="number" placeholder="Käytössä €" step="0.01" class="mid"/>
+    <input type="date" class="mid"/>`,
+
+  kiinnitys: () => `
+    <input type="number" placeholder="Määrä €" step="0.01" class="mid"/>
+    <input type="text" placeholder="Lisätieto" style="flex:3"/>`,
+
+  korjaus: () => `
+    <input type="text" placeholder="Toimenpide / selvitys" style="flex:3"/>
+    <input type="text" placeholder="Ajankohta / suunniteltu" class="mid"/>`,
+};
+
+function addRow(containerId, type) {
+  const c = document.getElementById(containerId);
+  const row = document.createElement('div');
+  row.className = 'dyn-row';
+  row.innerHTML = T[type]() +
+    `<button type="button" class="btn-rem" title="Poista rivi" onclick="this.closest('.dyn-row').remove()">×</button>`;
+  c.appendChild(row);
+}
+
+// ─── PDF helpers ──────────────────────────────────────────────────────────────
+function gv(id) { const el = document.getElementById(id); return el ? (el.value || '').trim() : ''; }
+function gc(id) { const el = document.getElementById(id); return el ? el.checked : false; }
+function fmtDate(iso) { if (!iso) return ''; const [y,m,d]=iso.split('-'); return `${d}.${m}.${y}`; }
+
+function checkedLabels(ids) {
+  return ids.filter(gc).map(id => {
+    const el = document.getElementById(id);
+    if (!el) return '';
+    const lbl = el.closest('label');
+    return lbl ? lbl.textContent.trim() : '';
+  }).filter(Boolean).join(', ') || '—';
+}
+
+function dynRows(containerId) {
+  const rows = [];
+  document.getElementById(containerId).querySelectorAll('.dyn-row').forEach(row => {
+    const parts = [];
+    row.querySelectorAll('input[type=text],input[type=number],input[type=date],textarea').forEach(i => {
+      if ((i.value||'').trim()) parts.push(i.value.trim());
+    });
+    const cbs = [];
+    row.querySelectorAll('input[type=checkbox]').forEach(cb => {
+      if (cb.checked) {
+        const lbl = cb.closest('label');
+        cbs.push(lbl ? lbl.textContent.trim() : '✓');
+      }
+    });
+    if (cbs.length) parts.push('(' + cbs.join(', ') + ')');
+    if (parts.length) rows.push(parts.join(' | '));
+  });
+  return rows;
+}
+
+function clearForm() {
+  if (confirm('Tyhjennä koko lomake?')) document.getElementById('form').reset();
+}
+
+function generatePDF() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+  const W = 210, ML = 15, MR = 15, CW = W - ML - MR;
+  let y = 0;
+
+  const C_BLUE = [13, 59, 102];
+  const C_DARK = [26, 26, 46];
+  const C_GRAY = [100, 110, 130];
+  const C_LIGHT = [232, 237, 243];
+  const C_SUBSEC = [220, 228, 240];
+
+  function newPage() { doc.addPage(); y = 15; }
+  function chk(need = 8) { if (y + need > 282) newPage(); }
+
+  // Title block
+  doc.setFillColor(...C_BLUE);
+  doc.rect(0, 0, W, 28, 'F');
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(16); doc.setFont('helvetica', 'bold');
+  doc.text('ISÄNNÖITSIJÄNTODISTUS', ML, 12);
+  doc.setFontSize(8); doc.setFont('helvetica', 'normal');
+  doc.text('Asunto-osakeyhtiölaki 1599/2009 · 7 luku 27 §', ML, 18);
+  doc.text('Todistus on laadittu osakkeenomistajan pyynnöstä', ML, 23);
+  y = 34;
+
+  function secHeader(num, title) {
+    chk(12);
+    doc.setFillColor(...C_BLUE);
+    doc.rect(ML, y, CW, 8, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(8.5); doc.setFont('helvetica', 'bold');
+    doc.text(`${num}. ${title.toUpperCase()}`, ML + 3, y + 5.5);
+    y += 11;
+  }
+
+  function subsecHeader(title) {
+    chk(9);
+    doc.setFillColor(...C_SUBSEC);
+    doc.rect(ML, y, CW, 6, 'F');
+    doc.setTextColor(...C_BLUE);
+    doc.setFontSize(7.5); doc.setFont('helvetica', 'bold');
+    doc.text(title, ML + 2, y + 4.2);
+    y += 8;
+  }
+
+  function field(label, value, indent = 0) {
+    const v = value || '—';
+    const lines = doc.splitTextToSize(v, CW - indent - 2);
+    const need = 5 + lines.length * 4.5;
+    chk(need);
+    doc.setFontSize(6.8); doc.setFont('helvetica', 'bold'); doc.setTextColor(...C_GRAY);
+    doc.text(label, ML + indent, y);
+    y += 3.5;
+    doc.setFontSize(8.5); doc.setFont('helvetica', 'normal'); doc.setTextColor(...C_DARK);
+    doc.text(lines, ML + indent, y);
+    y += lines.length * 4.5 + 1;
+  }
+
+  function field2(label1, val1, label2, val2) {
+    const half = CW / 2 - 2;
+    const v1 = val1 || '—', v2 = val2 || '—';
+    const l1 = doc.splitTextToSize(v1, half);
+    const l2 = doc.splitTextToSize(v2, half);
+    const need = 5 + Math.max(l1.length, l2.length) * 4.5;
+    chk(need);
+    doc.setFontSize(6.8); doc.setFont('helvetica', 'bold'); doc.setTextColor(...C_GRAY);
+    doc.text(label1, ML, y);
+    doc.text(label2, ML + CW / 2 + 2, y);
+    y += 3.5;
+    doc.setFontSize(8.5); doc.setFont('helvetica', 'normal'); doc.setTextColor(...C_DARK);
+    doc.text(l1, ML, y);
+    doc.text(l2, ML + CW / 2 + 2, y);
+    y += Math.max(l1.length, l2.length) * 4.5 + 1;
+  }
+
+  function field3(l1,v1,l2,v2,l3,v3) {
+    const third = CW / 3 - 2;
+    const vals = [v1||'—',v2||'—',v3||'—'];
+    const labels = [l1,l2,l3];
+    const split = vals.map(v => doc.splitTextToSize(v, third));
+    const maxLines = Math.max(...split.map(s => s.length));
+    chk(5 + maxLines * 4.5);
+    doc.setFontSize(6.8); doc.setFont('helvetica', 'bold'); doc.setTextColor(...C_GRAY);
+    labels.forEach((l, i) => doc.text(l, ML + i * (CW / 3), y));
+    y += 3.5;
+    doc.setFontSize(8.5); doc.setFont('helvetica', 'normal'); doc.setTextColor(...C_DARK);
+    split.forEach((s, i) => doc.text(s, ML + i * (CW / 3), y));
+    y += maxLines * 4.5 + 1;
+  }
+
+  function dynSection(title, rows) {
+    if (!rows.length) return;
+    subsecHeader(title);
+    rows.forEach((r, i) => {
+      chk(6);
+      doc.setFillColor(i % 2 === 0 ? 248 : 255, i % 2 === 0 ? 250 : 255, i % 2 === 0 ? 252 : 255);
+      const lines = doc.splitTextToSize(`${i + 1}. ${r}`, CW - 4);
+      doc.rect(ML, y - 1, CW, lines.length * 4.5 + 2, 'F');
+      doc.setFontSize(8); doc.setFont('helvetica', 'normal'); doc.setTextColor(...C_DARK);
+      doc.text(lines, ML + 2, y + 3);
+      y += lines.length * 4.5 + 2;
+    });
+    y += 2;
+  }
+
+  function cbLine(label, ids) {
+    field(label, checkedLabels(ids));
+  }
+
+  // ── SECTION 1 ──
+  secHeader(1, 'Todistuksen kohde');
+  field2('Yhtiön nimi ja kiinteistön sijaintiosoite', gv('s1_nimi_osoite'),
+         'Isännöitsijän / hall.pj:n nimi ja osoite', gv('s1_isannoitsija_osoite'));
+  field3('Yritys- ja yhteisötunnus', gv('s1_ytunnus'),
+         'Kaupparekisterimerkinnän pvm', fmtDate(gv('s1_kr_pvm')),
+         'Yhtiöjärjestyksen rekisteröintipvm', fmtDate(gv('s1_yj_pvm')));
+  y += 2;
+
+  // ── SECTION 2 ──
+  secHeader(2, 'Tiedot osakehuoneistosta');
+  field3('Osakkeiden numerot', gv('s2_osk_nrot'),
+         'Osakkeiden lukumäärä', gv('s2_osk_lkm'),
+         'Osakehuoneiston tunnus', gv('s2_tunnus'));
+  field3('Porras', gv('s2_porras'), 'Kerros', gv('s2_kerros'),
+         'Muut osakashallintaan kuuluvat tilat', gv('s2_muut_tilat'));
+  field2('YJ:n mukainen huoneluku', gv('s2_yj_huoneluku'),
+         'Osakkaan ilmoittama huoneluku', gv('s2_osakas_huoneluku'));
+  field2('Rakennusluvan mukainen käyttötarkoitus', gv('s2_rak_kaytto'),
+         'YJ:n mukainen käyttötarkoitus', gv('s2_yj_kaytto'));
+  field2('YJ:n mukainen pinta-ala m²', gv('s2_yj_ala'),
+         'SFS 5139 tarkistusmitattu pinta-ala m²', gv('s2_sfs_ala'));
+  field2('Osakeluetteloon merkitty omistaja', gv('s2_omistaja'),
+         'Merkintäpvm', fmtDate(gv('s2_merkinta_pvm')));
+
+  field('Lunastusoikeus osakkeisiin',
+    checkedLabels(['s2_lun_yhtio','s2_lun_osakkaat','s2_lun_muu']) +
+    (gv('s2_lun_muu_txt') ? ` (${gv('s2_lun_muu_txt')})` : ''));
+  field('Muu käyttö- tai luovutusrajoitus',
+    checkedLabels(['s2_raj_kunta','s2_raj_hitas','s2_raj_leski','s2_raj_muu']));
+
+  if (gc('s2_hallinta_cb')) {
+    field3('Hallintaanotto päätetty', fmtDate(gv('s2_hallinta_paatos')),
+           'Mistä', fmtDate(gv('s2_hallinta_mista')),
+           'Mihin', fmtDate(gv('s2_hallinta_mihin')));
+  }
+  field('Yhtiö vuokrannut huoneiston', checkedLabels(['s2_vuokra_kylla','s2_vuokra_ei']));
+
+  dynSection('Osakkaan suorittamat kunnossapito- ja muutostyöt', dynRows('dyn-osakas-tyot'));
+  dynSection('Yhtiön huoneistossa suorittamat kunnossapito- ja muutostyöt', dynRows('dyn-yhtio-tyot'));
+  dynSection('Huoneiston kunnossapitovastuuta koskevat määräykset', dynRows('dyn-kunnossapitovastuu'));
+  dynSection('Huoneiston olennaiset viat ja puutteet', dynRows('dyn-viat'));
+  y += 2;
+
+  // ── SECTION 3 ──
+  secHeader(3, 'Tiedot yhtiön taloudesta');
+  subsecHeader('3.1 Huoneisto');
+  field2('Hoitovastike €/kk', gv('s31_hoito'), 'Vastikeperuste', gv('s31_vastikeperuste'));
+  dynSection('Pääomavastike/-vastikkeet ja lainaosuudet', dynRows('dyn-paaomavastike'));
+  dynSection('Muut vastikkeet ja niiden perusteet', dynRows('dyn-muutvastikkeet'));
+  dynSection('Muut maksut (käyttökorvaukset) ja niiden perusteet', dynRows('dyn-muutmaksut'));
+  dynSection('Osuus yhtiön hoitolainoista', dynRows('dyn-hoitolainat'));
+  dynSection('Yhtiön nostamattomat lainat ja osuus niistä', dynRows('dyn-nostamattomat31'));
+  field('Huoneiston osalta hakeuduttu arvonlisäverovelvolliseksi',
+    checkedLabels(['s31_alv_ei','s31_alv_kylla']));
+  dynSection('Erääntyneet ja maksamatta olevat vastikkeet', dynRows('dyn-eraantyneet-vast'));
+  dynSection('Erääntyneet ja maksamatta olevat muut maksut', dynRows('dyn-eraantyneet-maksut'));
+
+  subsecHeader('3.2 Yhtiö');
+  dynSection('Yhtiön pääoma- ja hoitolainat', dynRows('dyn-yhtiolainat'));
+  dynSection('Yhtiön luotolliset tilit', dynRows('dyn-luotolliset'));
+  field('Yhtiön nostamattomat lainat', gv('s32_nostamattomat'));
+  field2('Vastikkeen suuruudesta ja maksutavasta päättävä taho', gv('s32_paattava_taho'),
+         'Yhtiö hakeutunut arvonlisäverovelvolliseksi',
+         checkedLabels(['s32_alv_ei','s32_alv_kylla','s32_alv_osittain']));
+  dynSection('Kiinnitykset', dynRows('dyn-kiinnitykset'));
+  field2('Vakuutukset',
+    checkedLabels(['s32_vak_taysi','s32_vak_muu']) +
+    (gv('s32_vak_muu_txt') ? ` – ${gv('s32_vak_muu_txt')}` : ''),
+    'Vakuutusyhtiö', gv('s32_vakuutusyhtio'));
+  y += 2;
+
+  // ── SECTION 4 ──
+  secHeader(4, 'Tiedot kiinteistöstä ja rakennuksesta');
+  field3('Asuntojen lkm', gv('s4_asunnot_lkm'),
+         'Asuinhuoneisto-osakkeiden lkm', gv('s4_asosk_lkm'),
+         'Asuinhuoneistojen pinta-ala m²', gv('s4_as_ala'));
+  field2('Liike- ja muiden huoneistojen lkm', gv('s4_liike_lkm'),
+         'Liike- ja muiden huoneistojen pinta-ala m²', gv('s4_liike_ala'));
+
+  const hallTxt = [
+    `Asuntoja: ${gv('s4_hall_as_kpl')||'—'} kpl, ${gv('s4_hall_as_ala')||'—'} m²`,
+    `Liikehuoneistoja: ${gv('s4_hall_liike_kpl')||'—'} kpl, ${gv('s4_hall_liike_ala')||'—'} m²`,
+    `Muita: ${gv('s4_hall_muita_kpl')||'—'} kpl, ${gv('s4_hall_muita_ala')||'—'} m²`,
+    `Yhteensä: ${gv('s4_hall_yht_kpl')||'—'} kpl, ${gv('s4_hall_yht_ala')||'—'} m²`,
+  ].join(' | ');
+  field('Yhtiön hallinnassa olevat huoneistot', hallTxt);
+
+  const apTxt = `Kaavan mukainen: ${gv('s4_ap_kaava')||'—'} | Toteutetut: ${gv('s4_ap_tot')||'—'} | Talli/halli: ${gv('s4_ap_talli')||'—'} | Katos: ${gv('s4_ap_katos')||'—'} | Sähkötolpalla: ${gv('s4_ap_sahko')||'—'} | Muut: ${gv('s4_ap_muut')||'—'} | Osakkeina: ${gv('s4_ap_osakkeet')||'—'} | Yhtiön hallinnassa: ${gv('s4_ap_hallinta')||'—'}`;
+  field('Autopaikat', apTxt);
+
+  field('Säilytystilat',
+    checkedLabels(['s4_sai_ullakko','s4_sai_kylma','s4_sai_muu']) +
+    (gv('s4_sai_muu_txt') ? ` – ${gv('s4_sai_muu_txt')}` : ''));
+  field('Yhteiset tilat',
+    checkedLabels(['s4_yt_sauna','s4_yt_pesu','s4_yt_kuivaus','s4_yt_mankeli','s4_yt_kerho',
+                   's4_yt_askar','s4_yt_ulkovar','s4_yt_vaesto','s4_yt_uima']));
+
+  field3('Kiinteistötunnus', gv('s4_kiint_tunnus'),
+         'Kiinteistön pinta-ala m²', gv('s4_kiint_ala'),
+         'Käyttämätön rakennusoikeus m²', gv('s4_raken_oikeus'));
+  field3('Tontti', checkedLabels(['s4_tontti_oma','s4_tontti_vuokra']),
+         'Vuosivuokra €', gv('s4_vuosivuokra'),
+         'Vuokran tarkistuspiste', checkedLabels(['s4_tarkistus_indeksi','s4_tarkistus_muu']));
+  field3('Vuokranantaja', gv('s4_vuokranantaja'),
+         'Vuokra-aika päättyy', fmtDate(gv('s4_vuokra_paattyy')),
+         'Tontin lunastusoikeus', checkedLabels(['s4_lun_yhtio','s4_lun_osakas']));
+  field2('Lunastusoikeutta käytetty', gc('s4_lun_kaytetty') ? 'Kyllä' : 'Ei',
+         'Huoneistoilla erilainen tontinvuokranmaksamisvastuu', gc('s4_eri_vastuu') ? 'Kyllä' : 'Ei');
+
+  field3('Rakennusten lukumäärä', gv('s4_rak_lkm'),
+         'Käyttöönottovuosi/-det', gv('s4_kayttovuosi'),
+         'Rakentaja / rakennusliike', gv('s4_rakentaja'));
+  field3('Talotyyppi', gv('s4_talotyyppi'),
+         'Kattotyyppi', gv('s4_kattotyyppi'),
+         'Rakennusmateriaali', gv('s4_rakmat'));
+  field2('Katemateriaali', gv('s4_katemat'),
+         'Lämmitys- ja jäähdytysjärjestelmä', gv('s4_lammitys'));
+  field2('Ilmanvaihtojärjestelmä', gv('s4_ilmanvaihto'),
+         'Antennijärjestelmä', checkedLabels(['s4_ant_yhteis','s4_ant_kaapeli','s4_ant_satelliitti']));
+  field('Tietoliikennejärjestelmä',
+    checkedLabels(['s4_tl_puhelin','s4_tl_kaapeli','s4_tl_valo','s4_tl_muu']));
+
+  field3('Hissien lukumäärä', gv('s4_hissit'),
+         'Tilavuus m³', gv('s4_tilavuus'),
+         'Kerrosala m²', gv('s4_kerrosala'));
+  field3('Kerrosten lukumäärä', gv('s4_kerrokset'),
+         'Porrashuoneiden lukumäärä', gv('s4_portaat'), '', '');
+  field3('Lämmönkulutus kWh/m³/v', gv('s4_lammitys_kwh'),
+         'Sähkönkulutus kWh/m³/v', gv('s4_sahko_kwh'),
+         'Vedenkulutus l/as/vrk', gv('s4_vesi'));
+  field('Tontin ja rakennusten yhteisomistus', gv('s4_yhteisomistus'));
+
+  if (gc('s4_hall_selvitys_tyot_cb'))
+    field('Hall. selvitys suoritetuista töistä – esitetty yhtiökokouksessa pvm', gv('s4_hall_selvitys_tyot_pvm'));
+  if (gc('s4_hall_selvitys_tarve_cb'))
+    field('Hall. selvitys kunnossapitotarpeesta – esitetty yhtiökokouksessa pvm', gv('s4_hall_selvitys_tarve_pvm'));
+  field('Kunnossapitosuunnitelma (PTS)', checkedLabels(['s4_pts_on','s4_pts_ei']));
+
+  dynSection('Tehdyt kuntoarviot ja -tutkimukset tai muut selvitykset', dynRows('dyn-kuntoarviot'));
+  dynSection('Päätetyt korjaus- ja muutostyöt', dynRows('dyn-paatetyt'));
+  dynSection('Hallituksen ehdottamat korjaukset', dynRows('dyn-hall-ehdotukset'));
+  dynSection('Yhtiökokouksen jälkeen ilmenneet korjaustarpeet', dynRows('dyn-kokous-korjaukset'));
+  y += 2;
+
+  // ── SECTION 5 ──
+  secHeader(5, 'Muut tiedot');
+  field2('Isännöinti', checkedLabels(['s5_isan_yritys','s5_isan_oma','s5_isan_ei']),
+         'Kiinteistönhoidon organisointi',
+         checkedLabels(['s5_kh_yritys','s5_kh_talonmies','s5_kh_oma']));
+  field2('Yhtiön osakkeet kuuluvat osakehuoneistorekisteriin',
+         checkedLabels(['s5_osk_rek_kylla','s5_osk_rek_ei']),
+         'Osakeryhmä kuuluu osakehuoneistorekisteriin',
+         checkedLabels(['s5_osk_ryh_kylla','s5_osk_ryh_ei']));
+
+  const flags = [
+    ['s5_turvapaino', 'Osakekirjat painetaan turvapainossa'],
+    ['s5_vahemmisto', 'Vähemmistöosakkeiden poislunastusoikeus – Osakas'],
+    ['s5_energia', 'Voimassa oleva energiatodistus'],
+    ['s5_asbesti', 'Asbestikartoitus tehty'],
+    ['s5_jarjestys', 'Voimassa olevat järjestyssäännöt'],
+    ['s5_tupakki_paatos', 'Päätetty tupakointikiellosta'],
+    ['s5_tupakki_maarays', 'Kunnan määräämä tupakointikielto'],
+    ['s5_tupakki_hakemus', 'Yhtiökokous päättänyt hakea tupakointikieltoa'],
+    ['s5_apaikat_saannot', 'Autopaikkasääntöjen mukainen jakaminen'],
+  ].filter(([id]) => gc(id)).map(([,lbl]) => lbl);
+  if (flags.length) field('Voimassa olevat päätökset ja todistukset', flags.join(', '));
+
+  field('Osakeanti-, optio- ym. oikeuden antamisvaltuustiedot', gv('s5_osakeanti'));
+  field('Yhtiöjärjestyksen kohtuuttomuuskanne ym.', gv('s5_kanne'));
+  field2('Isännöitsijäntodistuksen tilaaja', `${gv('s5_tilaaja_nimi')} ${gv('s5_tilaaja_puh')}`.trim(),
+         'Yhtiön edustaja', `${gv('s5_edustaja_nimi')} ${gv('s5_edustaja_puh')}`.trim());
+  y += 2;
+
+  // ── SECTION 6 ──
+  secHeader(6, 'Liitteet');
+  const liitteet = [
+    ['s6_tilinpaatos','Tilinpäätös'],['s6_toimintakertomus','Toimintakertomus'],
+    ['s6_talousarvio','Talousarvio'],['s6_tilintarkastus','Tilintarkastuskertomus'],
+    ['s6_toiminnantarkastus','Toiminnantarkastuskertomus'],
+    ['s6_hall_tyot','Hallituksen selvitys suoritetuista töistä'],
+    ['s6_hall_tarve','Hallituksen selvitys kunnossapitotarpeesta'],
+    ['s6_energia','Energiatodistus'],['s6_jarjestyssaannot','Järjestyssäännöt'],
+    ['s6_yhtiojarjestys','Yhtiöjärjestys'],
+  ].filter(([id]) => gc(id)).map(([,lbl]) => lbl);
+  field('Oheistetut liitteet', liitteet.length ? liitteet.join(', ') : '—');
+  y += 4;
+
+  // Signature area
+  chk(25);
+  doc.setFontSize(7); doc.setFont('helvetica','normal'); doc.setTextColor(...C_GRAY);
+  doc.text('Allekirjoitus', ML, y); doc.text('Nimenselvennys', ML + 70, y); doc.text('Pvm', ML + 140, y);
+  y += 10;
+  doc.setDrawColor(...C_DARK);
+  doc.line(ML, y, ML + 60, y);
+  doc.line(ML + 70, y, ML + 130, y);
+  doc.line(ML + 140, y, ML + CW, y);
+
+  // Footers
+  const pages = doc.getNumberOfPages();
+  const yhtio = gv('s1_nimi_osoite').split('\n')[0] || 'Isännöitsijäntodistus';
+  for (let i = 1; i <= pages; i++) {
+    doc.setPage(i);
+    doc.setFontSize(6.5); doc.setFont('helvetica','normal'); doc.setTextColor(...C_GRAY);
+    doc.text(`${yhtio}  ·  Isännöitsijäntodistus`, ML, 291);
+    doc.text(`Sivu ${i} / ${pages}`, W - MR, 291, { align: 'right' });
+    doc.setDrawColor(...C_LIGHT);
+    doc.line(ML, 288, W - MR, 288);
+  }
+
+  const fname = yhtio.replace(/[^a-zA-Z0-9äöåÄÖÅ _-]/g,'_').replace(/\s+/g,'_');
+  doc.save(`${fname}_isannoitsijantodistus.pdf`);
+  const s = document.getElementById('status');
+  s.textContent = 'PDF ladattu!';
+  setTimeout(() => { s.textContent = ''; }, 3000);
+}
+</script>
+</body>
+</html>
