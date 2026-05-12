@@ -988,6 +988,35 @@ function generatePDF() {
     y += maxLines * 4.5 + 1;
   }
 
+  function korjausSection(title, containerId, alwaysShow = false) {
+    const rows = [];
+    document.getElementById(containerId).querySelectorAll('.dyn-row').forEach(row => {
+      const inputs = [...row.querySelectorAll('input[type=text],textarea')];
+      const desc = (inputs[0]?.value || '').trim();
+      const date = (inputs[1]?.value || '').trim();
+      if (desc || date) rows.push({ desc, date });
+    });
+    if (!rows.length && !alwaysShow) return;
+    subsecHeader(title);
+    if (!rows.length) return;
+    const dateW = 42, descW = CW - dateW - 6;
+    rows.forEach(({ desc, date }, i) => {
+      const descLines = doc.splitTextToSize(desc || '—', descW);
+      const rowH = descLines.length * 4.5 + 3;
+      chk(rowH + 2);
+      doc.setFillColor(i%2===0?248:255, i%2===0?250:255, i%2===0?252:255);
+      doc.rect(ML, y-1, CW, rowH, 'F');
+      doc.setFontSize(8); doc.setFont('helvetica','normal'); doc.setTextColor(...C_DARK);
+      doc.text(descLines, ML+2, y+3);
+      if (date) {
+        doc.setFontSize(7.5); doc.setFont('helvetica','italic'); doc.setTextColor(...C_GRAY);
+        doc.text(date, ML+CW-2, y+3, {align:'right'});
+      }
+      y += rowH;
+    });
+    y += 2;
+  }
+
   function dynSection(title, rows, alwaysShow = false) {
     if (!rows.length && !alwaysShow) return;
     subsecHeader(title);
@@ -1003,8 +1032,50 @@ function generatePDF() {
     if (rows.length) y += 2;
   }
 
-  function cbLine(label, ids) {
-    field(label, checkedLabels(ids));
+  function cbField(label, ids, suffix) {
+    const BS = 2.5, BG = 1.2, IG = 5;
+    const items = ids.map(id => {
+      const el = document.getElementById(id);
+      if (!el) return null;
+      const lbl = el.closest('label');
+      return { checked: el.checked, text: lbl ? lbl.textContent.trim() : id };
+    }).filter(Boolean);
+    doc.setFontSize(8); doc.setFont('helvetica', 'normal');
+    const iw = items.map(it => BS + BG + doc.getTextWidth(it.text) + IG);
+    let numRows = 1, rw = 0;
+    iw.forEach(w => { if (rw + w > CW && rw > 0) { numRows++; rw = w; } else rw += w; });
+    chk(4 + numRows * 5.5 + (suffix ? 5 : 0));
+    doc.setFontSize(6.8); doc.setFont('helvetica', 'bold'); doc.setTextColor(...C_GRAY);
+    doc.text(label, ML, y);
+    y += 3.5;
+    let cx = ML;
+    doc.setFontSize(8); doc.setFont('helvetica', 'normal');
+    items.forEach((item, i) => {
+      if (cx + iw[i] > ML + CW && cx > ML) { cx = ML; y += 5.5; }
+      const by = y - BS + 0.5;
+      doc.setLineWidth(0.35);
+      if (item.checked) {
+        doc.setFillColor(...C_BLUE); doc.setDrawColor(...C_BLUE);
+        doc.rect(cx, by, BS, BS, 'FD');
+        doc.setDrawColor(255, 255, 255); doc.setLineWidth(0.5);
+        doc.line(cx + 0.4, by + BS * 0.55, cx + BS * 0.42, by + BS * 0.88);
+        doc.line(cx + BS * 0.42, by + BS * 0.88, cx + BS - 0.3, by + 0.3);
+      } else {
+        doc.setFillColor(255, 255, 255); doc.setDrawColor(150, 160, 180);
+        doc.rect(cx, by, BS, BS, 'FD');
+      }
+      doc.setTextColor(...C_DARK);
+      doc.text(item.text, cx + BS + BG, y);
+      cx += iw[i];
+    });
+    y += 5.5;
+    if (suffix) {
+      doc.setFontSize(8); doc.setFont('helvetica', 'normal'); doc.setTextColor(...C_DARK);
+      const lines = doc.splitTextToSize(suffix, CW - 2);
+      chk(lines.length * 4.5 + 2);
+      doc.text(lines, ML, y);
+      y += lines.length * 4.5 + 1;
+    }
   }
 
   // ── SECTION 1 ──
@@ -1032,18 +1103,16 @@ function generatePDF() {
   field2('Osakeluetteloon merkitty omistaja', gv('s2_omistaja'),
          'Merkintäpvm', fmtDate(gv('s2_merkinta_pvm')));
 
-  field('Lunastusoikeus osakkeisiin',
-    checkedLabels(['s2_lun_yhtio','s2_lun_osakkaat','s2_lun_muu']) +
-    (gv('s2_lun_muu_txt') ? ` (${gv('s2_lun_muu_txt')})` : ''));
-  field('Muu käyttö- tai luovutusrajoitus',
-    checkedLabels(['s2_raj_kunta','s2_raj_hitas','s2_raj_leski','s2_raj_muu']));
+  cbField('Lunastusoikeus osakkeisiin', ['s2_lun_yhtio','s2_lun_osakkaat','s2_lun_muu'],
+    gv('s2_lun_muu_txt'));
+  cbField('Muu käyttö- tai luovutusrajoitus', ['s2_raj_kunta','s2_raj_hitas','s2_raj_leski','s2_raj_muu']);
 
   if (gc('s2_hallinta_cb')) {
     field3('Hallintaanotto päätetty', fmtDate(gv('s2_hallinta_paatos')),
            'Mistä', fmtDate(gv('s2_hallinta_mista')),
            'Mihin', fmtDate(gv('s2_hallinta_mihin')));
   }
-  field('Yhtiö vuokrannut huoneiston', checkedLabels(['s2_vuokra_kylla','s2_vuokra_ei']));
+  cbField('Yhtiö vuokrannut huoneiston', ['s2_vuokra_kylla','s2_vuokra_ei']);
 
   dynSection('Osakkaan suorittamat kunnossapito- ja muutostyöt', dynRows('dyn-osakas-tyot'));
   dynSection('Yhtiön huoneistossa suorittamat kunnossapito- ja muutostyöt', dynRows('dyn-yhtio-tyot'));
@@ -1060,8 +1129,7 @@ function generatePDF() {
   dynSection('Muut maksut (käyttökorvaukset) ja niiden perusteet', dynRows('dyn-muutmaksut'));
   dynSection('Osuus yhtiön hoitolainoista', dynRows('dyn-hoitolainat'));
   dynSection('Yhtiön nostamattomat lainat ja osuus niistä', dynRows('dyn-nostamattomat31'));
-  field('Huoneiston osalta hakeuduttu arvonlisäverovelvolliseksi',
-    checkedLabels(['s31_alv_ei','s31_alv_kylla']));
+  cbField('Huoneiston osalta hakeuduttu arvonlisäverovelvolliseksi', ['s31_alv_ei','s31_alv_kylla']);
   dynSection('Erääntyneet ja maksamatta olevat vastikkeet', dynRows('dyn-eraantyneet-vast'));
   dynSection('Erääntyneet ja maksamatta olevat muut maksut', dynRows('dyn-eraantyneet-maksut'));
 
@@ -1069,14 +1137,11 @@ function generatePDF() {
   dynSection('Yhtiön pääoma- ja hoitolainat', dynRows('dyn-yhtiolainat'));
   dynSection('Yhtiön luotolliset tilit', dynRows('dyn-luotolliset'));
   field('Yhtiön nostamattomat lainat', gv('s32_nostamattomat'));
-  field2('Vastikkeen suuruudesta ja maksutavasta päättävä taho', gv('s32_paattava_taho'),
-         'Yhtiö hakeutunut arvonlisäverovelvolliseksi',
-         checkedLabels(['s32_alv_ei','s32_alv_kylla','s32_alv_osittain']));
+  field('Vastikkeen suuruudesta ja maksutavasta päättävä taho', gv('s32_paattava_taho'));
+  cbField('Yhtiö hakeutunut arvonlisäverovelvolliseksi', ['s32_alv_ei','s32_alv_kylla','s32_alv_osittain']);
   dynSection('Kiinnitykset', dynRows('dyn-kiinnitykset'));
-  field2('Vakuutukset',
-    checkedLabels(['s32_vak_taysi','s32_vak_muu']) +
-    (gv('s32_vak_muu_txt') ? ` – ${gv('s32_vak_muu_txt')}` : ''),
-    'Vakuutusyhtiö', gv('s32_vakuutusyhtio'));
+  field('Vakuutusyhtiö', gv('s32_vakuutusyhtio'));
+  cbField('Vakuutukset', ['s32_vak_taysi','s32_vak_muu'], gv('s32_vak_muu_txt'));
   y += 2;
 
   // ── SECTION 4 ──
@@ -1124,23 +1189,19 @@ function generatePDF() {
   field3('Autokatospaikat', gv('s4_ap_katos'), 'Muut – sähkötolpalliset', gv('s4_ap_sahko'), 'Muut – muut', gv('s4_ap_muut'));
   field2('Näistä osakkeina', gv('s4_ap_osakkeet'), 'Yhtiön hallinnassa', gv('s4_ap_hallinta'));
 
-  field('Säilytystilat',
-    checkedLabels(['s4_sai_ullakko','s4_sai_kylma','s4_sai_muu']) +
-    (gv('s4_sai_muu_txt') ? ` – ${gv('s4_sai_muu_txt')}` : ''));
-  field('Yhteiset tilat',
-    checkedLabels(['s4_yt_sauna','s4_yt_pesu','s4_yt_kuivaus','s4_yt_mankeli','s4_yt_kerho',
-                   's4_yt_askar','s4_yt_ulkovar','s4_yt_vaesto','s4_yt_uima']));
+  cbField('Säilytystilat', ['s4_sai_ullakko','s4_sai_kylma','s4_sai_muu'], gv('s4_sai_muu_txt'));
+  cbField('Yhteiset tilat', ['s4_yt_sauna','s4_yt_pesu','s4_yt_kuivaus','s4_yt_mankeli','s4_yt_kerho',
+    's4_yt_askar','s4_yt_ulkovar','s4_yt_vaesto','s4_yt_uima']);
 
   subsecHeader('Kiinteistö');
   field3('Kiinteistötunnus', gv('s4_kiint_tunnus'),
          'Kiinteistön pinta-ala m²', gv('s4_kiint_ala'),
          'Käyttämätön rakennusoikeus m²', gv('s4_raken_oikeus'));
-  field3('Tontti', checkedLabels(['s4_tontti_oma','s4_tontti_vuokra']),
-         'Vuosivuokra €', gv('s4_vuosivuokra'),
-         'Vuokran tarkistuspiste', checkedLabels(['s4_tarkistus_indeksi','s4_tarkistus_muu']));
-  field3('Vuokranantaja', gv('s4_vuokranantaja'),
-         'Vuokra-aika päättyy', fmtDate(gv('s4_vuokra_paattyy')),
-         'Tontin lunastusoikeus', checkedLabels(['s4_lun_yhtio','s4_lun_osakas']));
+  field3('Vuosivuokra €', gv('s4_vuosivuokra'), 'Vuokranantaja', gv('s4_vuokranantaja'),
+         'Vuokra-aika päättyy', fmtDate(gv('s4_vuokra_paattyy')));
+  cbField('Tontti', ['s4_tontti_oma','s4_tontti_vuokra']);
+  cbField('Vuokran tarkistuspiste', ['s4_tarkistus_indeksi','s4_tarkistus_muu']);
+  cbField('Tontin lunastusoikeus', ['s4_lun_yhtio','s4_lun_osakas']);
   field2('Lunastusoikeutta käytetty', gc('s4_lun_kaytetty') ? 'Kyllä' : 'Ei',
          'Huoneistoilla erilainen tontinvuokranmaksamisvastuu', gc('s4_eri_vastuu') ? 'Kyllä' : 'Ei');
 
@@ -1153,10 +1214,9 @@ function generatePDF() {
          'Rakennusmateriaali', gv('s4_rakmat'));
   field2('Katemateriaali', gv('s4_katemat'),
          'Lämmitys- ja jäähdytysjärjestelmä', gv('s4_lammitys'));
-  field2('Ilmanvaihtojärjestelmä', gv('s4_ilmanvaihto'),
-         'Antennijärjestelmä', checkedLabels(['s4_ant_yhteis','s4_ant_kaapeli','s4_ant_satelliitti']));
-  field('Tietoliikennejärjestelmä',
-    checkedLabels(['s4_tl_puhelin','s4_tl_kaapeli','s4_tl_valo','s4_tl_muu']));
+  field('Ilmanvaihtojärjestelmä', gv('s4_ilmanvaihto'));
+  cbField('Antennijärjestelmä', ['s4_ant_yhteis','s4_ant_kaapeli','s4_ant_satelliitti']);
+  cbField('Tietoliikennejärjestelmä', ['s4_tl_puhelin','s4_tl_kaapeli','s4_tl_valo','s4_tl_muu']);
 
   subsecHeader('Tekniset tiedot');
   field3('Hissien lukumäärä', gv('s4_hissit'),
@@ -1173,36 +1233,25 @@ function generatePDF() {
     field('Hall. selvitys suoritetuista töistä – esitetty yhtiökokouksessa pvm', gv('s4_hall_selvitys_tyot_pvm'));
   if (gc('s4_hall_selvitys_tarve_cb'))
     field('Hall. selvitys kunnossapitotarpeesta – esitetty yhtiökokouksessa pvm', gv('s4_hall_selvitys_tarve_pvm'));
-  field('Kunnossapitosuunnitelma (PTS)', checkedLabels(['s4_pts_on','s4_pts_ei']));
+  cbField('Kunnossapitosuunnitelma (PTS)', ['s4_pts_on','s4_pts_ei']);
 
-  dynSection('Tehdyt kuntoarviot ja -tutkimukset tai muut selvitykset', dynRows('dyn-kuntoarviot'), true);
-  dynSection('Päätetyt korjaus- ja muutostyöt', dynRows('dyn-paatetyt'), true);
-  dynSection('Hallituksen ehdottamat korjaukset', dynRows('dyn-hall-ehdotukset'), true);
+  korjausSection('Tehdyt kuntoarviot ja -tutkimukset tai muut selvitykset', 'dyn-kuntoarviot', true);
+  korjausSection('Päätetyt korjaus- ja muutostyöt', 'dyn-paatetyt', true);
+  korjausSection('Hallituksen ehdottamat korjaukset', 'dyn-hall-ehdotukset', true);
   dynSection('Yhtiökokouksen jälkeen ilmenneet korjaustarpeet', dynRows('dyn-kokous-korjaukset'), true);
   y += 2;
 
   // ── SECTION 5 ──
   secHeader(5, 'Muut tiedot');
-  field2('Isännöinti', checkedLabels(['s5_isan_yritys','s5_isan_oma','s5_isan_ei']),
-         'Kiinteistönhoidon organisointi',
-         checkedLabels(['s5_kh_yritys','s5_kh_talonmies','s5_kh_oma']));
-  field2('Yhtiön osakkeet kuuluvat osakehuoneistorekisteriin',
-         checkedLabels(['s5_osk_rek_kylla','s5_osk_rek_ei']),
-         'Osakeryhmä kuuluu osakehuoneistorekisteriin',
-         checkedLabels(['s5_osk_ryh_kylla','s5_osk_ryh_ei']));
+  cbField('Isännöinti', ['s5_isan_yritys','s5_isan_oma','s5_isan_ei']);
+  cbField('Kiinteistönhoidon organisointi', ['s5_kh_yritys','s5_kh_talonmies','s5_kh_oma']);
+  cbField('Yhtiön osakkeet kuuluvat osakehuoneistorekisteriin', ['s5_osk_rek_kylla','s5_osk_rek_ei']);
+  cbField('Osakeryhmä kuuluu osakehuoneistorekisteriin', ['s5_osk_ryh_kylla','s5_osk_ryh_ei']);
 
-  const flags = [
-    ['s5_turvapaino', 'Osakekirjat painetaan turvapainossa'],
-    ['s5_vahemmisto', 'Vähemmistöosakkeiden poislunastusoikeus – Osakas'],
-    ['s5_energia', 'Voimassa oleva energiatodistus'],
-    ['s5_asbesti', 'Asbestikartoitus tehty'],
-    ['s5_jarjestys', 'Voimassa olevat järjestyssäännöt'],
-    ['s5_tupakki_paatos', 'Päätetty tupakointikiellosta'],
-    ['s5_tupakki_maarays', 'Kunnan määräämä tupakointikielto'],
-    ['s5_tupakki_hakemus', 'Yhtiökokous päättänyt hakea tupakointikieltoa'],
-    ['s5_apaikat_saannot', 'Autopaikkasääntöjen mukainen jakaminen'],
-  ].filter(([id]) => gc(id)).map(([,lbl]) => lbl);
-  if (flags.length) field('Voimassa olevat päätökset ja todistukset', flags.join(', '));
+  cbField('Voimassa olevat päätökset ja todistukset', [
+    's5_turvapaino','s5_vahemmisto','s5_energia','s5_asbesti','s5_jarjestys',
+    's5_tupakki_paatos','s5_tupakki_maarays','s5_tupakki_hakemus','s5_apaikat_saannot'
+  ]);
 
   field('Osakeanti-, optio- ym. oikeuden antamisvaltuustiedot', gv('s5_osakeanti'));
   field('Yhtiöjärjestyksen kohtuuttomuuskanne ym.', gv('s5_kanne'));
@@ -1212,16 +1261,11 @@ function generatePDF() {
 
   // ── SECTION 6 ──
   secHeader(6, 'Liitteet');
-  const liitteet = [
-    ['s6_tilinpaatos','Tilinpäätös'],['s6_toimintakertomus','Toimintakertomus'],
-    ['s6_talousarvio','Talousarvio'],['s6_tilintarkastus','Tilintarkastuskertomus'],
-    ['s6_toiminnantarkastus','Toiminnantarkastuskertomus'],
-    ['s6_hall_tyot','Hallituksen selvitys suoritetuista töistä'],
-    ['s6_hall_tarve','Hallituksen selvitys kunnossapitotarpeesta'],
-    ['s6_energia','Energiatodistus'],['s6_jarjestyssaannot','Järjestyssäännöt'],
-    ['s6_yhtiojarjestys','Yhtiöjärjestys'],
-  ].filter(([id]) => gc(id)).map(([,lbl]) => lbl);
-  field('Oheistetut liitteet', liitteet.length ? liitteet.join(', ') : '—');
+  cbField('Oheistetut liitteet', [
+    's6_tilinpaatos','s6_toimintakertomus','s6_talousarvio','s6_tilintarkastus',
+    's6_toiminnantarkastus','s6_hall_tyot','s6_hall_tarve',
+    's6_energia','s6_jarjestyssaannot','s6_yhtiojarjestys'
+  ]);
   y += 4;
 
   // Signature area
