@@ -988,8 +988,8 @@ function generatePDF() {
     y += maxLines * 4.5 + 1;
   }
 
-  function dynSection(title, rows) {
-    if (!rows.length) return;
+  function dynSection(title, rows, alwaysShow = false) {
+    if (!rows.length && !alwaysShow) return;
     subsecHeader(title);
     rows.forEach((r, i) => {
       chk(6);
@@ -1000,7 +1000,7 @@ function generatePDF() {
       doc.text(lines, ML + 2, y + 3);
       y += lines.length * 4.5 + 2;
     });
-    y += 2;
+    if (rows.length) y += 2;
   }
 
   function cbLine(label, ids) {
@@ -1087,16 +1087,42 @@ function generatePDF() {
   field2('Liike- ja muiden huoneistojen lkm', gv('s4_liike_lkm'),
          'Liike- ja muiden huoneistojen pinta-ala m²', gv('s4_liike_ala'));
 
-  const hallTxt = [
-    `Asuntoja: ${gv('s4_hall_as_kpl')||'—'} kpl, ${gv('s4_hall_as_ala')||'—'} m²`,
-    `Liikehuoneistoja: ${gv('s4_hall_liike_kpl')||'—'} kpl, ${gv('s4_hall_liike_ala')||'—'} m²`,
-    `Muita: ${gv('s4_hall_muita_kpl')||'—'} kpl, ${gv('s4_hall_muita_ala')||'—'} m²`,
-    `Yhteensä: ${gv('s4_hall_yht_kpl')||'—'} kpl, ${gv('s4_hall_yht_ala')||'—'} m²`,
-  ].join(' | ');
-  field('Yhtiön hallinnassa olevat huoneistot', hallTxt);
+  // Yhtiön hallinnassa olevat huoneistot – mini table
+  (function() {
+    chk(42);
+    doc.setFontSize(6.8); doc.setFont('helvetica','bold'); doc.setTextColor(...C_GRAY);
+    doc.text('Yhtiön hallinnassa olevat huoneistot', ML, y);
+    y += 3.5;
+    const cx = [ML, ML+80, ML+110];
+    const rh = 5.5;
+    doc.setFillColor(...C_SUBSEC);
+    doc.rect(ML, y-1, 120, rh, 'F');
+    doc.setFontSize(7); doc.setFont('helvetica','bold'); doc.setTextColor(...C_BLUE);
+    doc.text('Tyyppi', cx[0]+2, y+3);
+    doc.text('kpl', cx[1]+2, y+3);
+    doc.text('m²', cx[2]+2, y+3);
+    y += rh;
+    [
+      ['Asuntoja', gv('s4_hall_as_kpl'), gv('s4_hall_as_ala')],
+      ['Liikehuoneistoja', gv('s4_hall_liike_kpl'), gv('s4_hall_liike_ala')],
+      ['Muita', gv('s4_hall_muita_kpl'), gv('s4_hall_muita_ala')],
+      ['Yhteensä', gv('s4_hall_yht_kpl'), gv('s4_hall_yht_ala')],
+    ].forEach(([lbl, kpl, ala], i) => {
+      doc.setFillColor(i%2===0?248:255, i%2===0?250:255, i%2===0?252:255);
+      doc.rect(ML, y-1, 120, rh, 'F');
+      doc.setFontSize(8); doc.setFont('helvetica', i===3?'bold':'normal'); doc.setTextColor(...C_DARK);
+      doc.text(lbl, cx[0]+2, y+3);
+      doc.text(kpl||'—', cx[1]+2, y+3);
+      doc.text(ala||'—', cx[2]+2, y+3);
+      y += rh;
+    });
+    y += 3;
+  })();
 
-  const apTxt = `Kaavan mukainen: ${gv('s4_ap_kaava')||'—'} | Toteutetut: ${gv('s4_ap_tot')||'—'} | Talli/halli: ${gv('s4_ap_talli')||'—'} | Katos: ${gv('s4_ap_katos')||'—'} | Sähkötolpalla: ${gv('s4_ap_sahko')||'—'} | Muut: ${gv('s4_ap_muut')||'—'} | Osakkeina: ${gv('s4_ap_osakkeet')||'—'} | Yhtiön hallinnassa: ${gv('s4_ap_hallinta')||'—'}`;
-  field('Autopaikat', apTxt);
+  subsecHeader('Autopaikat');
+  field3('Kaavan mukainen', gv('s4_ap_kaava'), 'Toteutetut', gv('s4_ap_tot'), 'Talli-/hallipaikat', gv('s4_ap_talli'));
+  field3('Autokatospaikat', gv('s4_ap_katos'), 'Muut – sähkötolpalliset', gv('s4_ap_sahko'), 'Muut – muut', gv('s4_ap_muut'));
+  field2('Näistä osakkeina', gv('s4_ap_osakkeet'), 'Yhtiön hallinnassa', gv('s4_ap_hallinta'));
 
   field('Säilytystilat',
     checkedLabels(['s4_sai_ullakko','s4_sai_kylma','s4_sai_muu']) +
@@ -1105,6 +1131,7 @@ function generatePDF() {
     checkedLabels(['s4_yt_sauna','s4_yt_pesu','s4_yt_kuivaus','s4_yt_mankeli','s4_yt_kerho',
                    's4_yt_askar','s4_yt_ulkovar','s4_yt_vaesto','s4_yt_uima']));
 
+  subsecHeader('Kiinteistö');
   field3('Kiinteistötunnus', gv('s4_kiint_tunnus'),
          'Kiinteistön pinta-ala m²', gv('s4_kiint_ala'),
          'Käyttämätön rakennusoikeus m²', gv('s4_raken_oikeus'));
@@ -1117,6 +1144,7 @@ function generatePDF() {
   field2('Lunastusoikeutta käytetty', gc('s4_lun_kaytetty') ? 'Kyllä' : 'Ei',
          'Huoneistoilla erilainen tontinvuokranmaksamisvastuu', gc('s4_eri_vastuu') ? 'Kyllä' : 'Ei');
 
+  subsecHeader('Rakennus');
   field3('Rakennusten lukumäärä', gv('s4_rak_lkm'),
          'Käyttöönottovuosi/-det', gv('s4_kayttovuosi'),
          'Rakentaja / rakennusliike', gv('s4_rakentaja'));
@@ -1130,6 +1158,7 @@ function generatePDF() {
   field('Tietoliikennejärjestelmä',
     checkedLabels(['s4_tl_puhelin','s4_tl_kaapeli','s4_tl_valo','s4_tl_muu']));
 
+  subsecHeader('Tekniset tiedot');
   field3('Hissien lukumäärä', gv('s4_hissit'),
          'Tilavuus m³', gv('s4_tilavuus'),
          'Kerrosala m²', gv('s4_kerrosala'));
@@ -1146,10 +1175,10 @@ function generatePDF() {
     field('Hall. selvitys kunnossapitotarpeesta – esitetty yhtiökokouksessa pvm', gv('s4_hall_selvitys_tarve_pvm'));
   field('Kunnossapitosuunnitelma (PTS)', checkedLabels(['s4_pts_on','s4_pts_ei']));
 
-  dynSection('Tehdyt kuntoarviot ja -tutkimukset tai muut selvitykset', dynRows('dyn-kuntoarviot'));
-  dynSection('Päätetyt korjaus- ja muutostyöt', dynRows('dyn-paatetyt'));
-  dynSection('Hallituksen ehdottamat korjaukset', dynRows('dyn-hall-ehdotukset'));
-  dynSection('Yhtiökokouksen jälkeen ilmenneet korjaustarpeet', dynRows('dyn-kokous-korjaukset'));
+  dynSection('Tehdyt kuntoarviot ja -tutkimukset tai muut selvitykset', dynRows('dyn-kuntoarviot'), true);
+  dynSection('Päätetyt korjaus- ja muutostyöt', dynRows('dyn-paatetyt'), true);
+  dynSection('Hallituksen ehdottamat korjaukset', dynRows('dyn-hall-ehdotukset'), true);
+  dynSection('Yhtiökokouksen jälkeen ilmenneet korjaustarpeet', dynRows('dyn-kokous-korjaukset'), true);
   y += 2;
 
   // ── SECTION 5 ──
