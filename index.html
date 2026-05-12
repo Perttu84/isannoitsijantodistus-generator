@@ -71,6 +71,19 @@ button.btn-secondary:hover{background:#d8e0ec}
 .hallinta-huoneistot td input{padding:.3rem .5rem;font-size:.82rem}
 
 @media(max-width:600px){.g2,.g3,.g4{grid-template-columns:1fr}.card{padding:1rem 1.1rem}}
+
+.btn-feedback{background:#fff;color:#0d3b66;border:1.5px solid #0d3b66;border-radius:8px;padding:.65rem 1.4rem;font-family:inherit;font-size:.9rem;font-weight:600;cursor:pointer}
+.btn-feedback:hover{background:#e8edf3}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1000;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:#fff;border-radius:12px;padding:1.75rem;width:min(440px,90vw);box-shadow:0 8px 32px rgba(0,0,0,.18)}
+.modal h2{font-size:1rem;font-weight:700;color:#0d3b66;margin-bottom:1rem}
+.modal-close{float:right;background:none;border:none;font-size:1.4rem;cursor:pointer;color:#888;line-height:1;margin-top:-.25rem}
+.modal-close:hover{color:#333}
+.modal-foot{display:flex;gap:.75rem;align-items:center;margin-top:1rem}
+.modal-msg{font-size:.85rem;font-weight:600}
+.modal-msg.ok{color:#2d7a4f}
+.modal-msg.err{color:#c0392b}
 </style>
 </head>
 <body>
@@ -714,10 +727,28 @@ button.btn-secondary:hover{background:#d8e0ec}
     <button type="button" class="btn-primary" onclick="generatePDF()">Luo PDF</button>
     <button type="button" class="btn-secondary" onclick="clearForm()">Tyhjennä lomake</button>
     <span class="status" id="status"></span>
+    <button type="button" class="btn-feedback" onclick="openFeedback()">Palaute</button>
     <a href="https://www.buymeacoffee.com/punis" target="_blank" rel="noopener" class="bmc-btn">🍺 Osta olut</a>
   </div>
 </div>
 </form>
+</div>
+
+<div class="modal-overlay" id="feedback-modal" onclick="closeFeedbackOnBg(event)">
+  <div class="modal">
+    <button class="modal-close" onclick="closeFeedback()">×</button>
+    <h2>Anna palautetta</h2>
+    <form id="feedback-form" onsubmit="submitFeedback(event)" novalidate>
+      <label class="field-label" for="fb-email">Sähköposti <span class="unit">(valinnainen – jos haluat vastauksen)</span></label>
+      <input type="email" id="fb-email" name="email" placeholder="sinun@email.fi" style="margin-bottom:.75rem"/>
+      <label class="field-label" for="fb-msg">Viesti</label>
+      <textarea id="fb-msg" name="message" rows="4" placeholder="Palaute, kehitysidea tai bugi…" required></textarea>
+      <div class="modal-foot">
+        <button type="submit" class="btn-primary" id="fb-submit">Lähetä</button>
+        <span class="modal-msg" id="fb-status"></span>
+      </div>
+    </form>
+  </div>
 </div>
 
 <script>
@@ -1295,6 +1326,43 @@ function generatePDF() {
   const s = document.getElementById('status');
   s.textContent = 'PDF ladattu!';
   setTimeout(() => { s.textContent = ''; }, 3000);
+}
+
+// ─── Feedback modal ───────────────────────────────────────────────────────────
+function openFeedback() {
+  document.getElementById('feedback-modal').classList.add('open');
+}
+function closeFeedback() {
+  document.getElementById('feedback-modal').classList.remove('open');
+  const s = document.getElementById('fb-status');
+  s.textContent = ''; s.className = 'modal-msg';
+}
+function closeFeedbackOnBg(e) {
+  if (e.target === document.getElementById('feedback-modal')) closeFeedback();
+}
+async function submitFeedback(e) {
+  e.preventDefault();
+  const btn = document.getElementById('fb-submit');
+  const status = document.getElementById('fb-status');
+  btn.disabled = true; btn.textContent = 'Lähetetään…';
+  try {
+    const res = await fetch('https://formspree.io/f/mpqbbvnj', {
+      method: 'POST',
+      headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: document.getElementById('fb-email').value,
+        message: document.getElementById('fb-msg').value,
+      }),
+    });
+    if (res.ok) {
+      status.textContent = 'Kiitos palautteesta!'; status.className = 'modal-msg ok';
+      document.getElementById('feedback-form').reset();
+      setTimeout(closeFeedback, 2000);
+    } else { throw new Error(); }
+  } catch {
+    status.textContent = 'Lähetys epäonnistui. Yritä uudelleen.'; status.className = 'modal-msg err';
+  }
+  btn.disabled = false; btn.textContent = 'Lähetä';
 }
 
 loadFromStorage();
