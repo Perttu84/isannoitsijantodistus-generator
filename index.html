@@ -72,6 +72,13 @@ button.btn-secondary:hover{background:#d8e0ec}
 
 @media(max-width:600px){.g2,.g3,.g4{grid-template-columns:1fr}.card{padding:1rem 1.1rem}}
 
+details.info{margin-top:.85rem}
+details.info summary{font-size:.85rem;color:#0d3b66;font-weight:600;cursor:pointer;user-select:none;list-style:none;display:flex;align-items:center;gap:.4rem}
+details.info summary::before{content:'▶';font-size:.65rem;transition:transform .2s}
+details.info[open] summary::before{transform:rotate(90deg)}
+details.info ul{margin:.65rem 0 0 1rem;padding:0;display:flex;flex-direction:column;gap:.35rem}
+details.info li{font-size:.82rem;color:#444;line-height:1.45}
+
 .btn-feedback{background:#fff;color:#0d3b66;border:1.5px solid #0d3b66;border-radius:8px;padding:.65rem 1.4rem;font-family:inherit;font-size:.9rem;font-weight:600;cursor:pointer}
 .btn-feedback:hover{background:#e8edf3}
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1000;align-items:center;justify-content:center}
@@ -91,6 +98,18 @@ button.btn-secondary:hover{background:#d8e0ec}
 <header>
   <h1>Isännöitsijäntodistus</h1>
   <p>Asunto-osakeyhtiölaki 1599/2009 · 7 luku 27 §</p>
+  <details class="info">
+    <summary>Tietoa sivusta</summary>
+    <ul>
+      <li>Täysin ilmainen palvelu isännöitsijäntodistusten luomiseksi!</li>
+      <li>Ei rekisteröitymistä</li>
+      <li>Tarkoitettu erityisesti pienille taloyhtiöille, joissa isännöinti on hoidettu omatoimisesti</li>
+      <li>Syntyi omasta tarpeesta, kun mistään internetistä ei tuntunut löytyvän vastaavaa palvelua ilmaiseksi</li>
+      <li>Palvelu ei tallenna syöttämiäsi tietoja minnekään – paitsi omaan selaimeesi, jotta voit jatkaa siitä mihin jäit</li>
+      <li>Lähetä palautetta palvelusta alhaalla olevasta <strong>Palaute</strong>-painikkeesta</li>
+      <li>Kyseessä on harrasteprojekti – jos haluat tukea sitä, voit lahjoittaa muutaman lantin alhaalla olevasta <strong>Osta olut</strong> -painikkeesta</li>
+    </ul>
+  </details>
 </header>
 <form id="form" novalidate>
 
