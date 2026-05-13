@@ -8,12 +8,11 @@
 <meta name="keywords" content="isännöitsijäntodistus, isännöitsijäntodistus ilmainen, isännöitsijäntodistus pohja, isännöitsijäntodistus malli, isännöitsijäntodistus pdf, omatoiminen isännöinti, pientaloyhtiö, taloyhtiö todistus"/>
 <meta name="robots" content="index, follow"/>
 
-<!-- Canonical – replace with your actual URL -->
-<link rel="canonical" href="https://perttu84.github.io/isannoitsijantodistus-generator/"/>
+<link rel="canonical" href="https://isannoitsijantodistus.app/"/>
 
 <!-- Open Graph -->
 <meta property="og:type" content="website"/>
-<meta property="og:url" content="https://perttu84.github.io/isannoitsijantodistus-generator/"/>
+<meta property="og:url" content="https://isannoitsijantodistus.app/"/>
 <meta property="og:title" content="Isännöitsijäntodistus – Ilmainen työkalu PDF-todistuksen luomiseen"/>
 <meta property="og:description" content="Luo isännöitsijäntodistus ilmaiseksi suoraan selaimessa – ei rekisteröitymistä. Tarkoitettu erityisesti omatoimisille pientaloyhtiöille."/>
 <meta property="og:locale" content="fi_FI"/>
@@ -964,7 +963,7 @@ function clearForm() {
 function generatePDF() {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ unit: 'mm', format: 'a4' });
-  doc.setProperties({ subject: 'isannoitsijantodistus.fi', creator: 'isannoitsijantodistus.fi', keywords: 'isannöitsijäntodistus' });
+  doc.setProperties({ subject: 'isannoitsijantodistus.app', creator: 'isannoitsijantodistus.app', keywords: 'isannöitsijäntodistus' });
   const W = 210, ML = 15, MR = 15, CW = W - ML - MR;
   let y = 0;
 
@@ -1349,7 +1348,7 @@ function generatePDF() {
   for (let i = 1; i <= pages; i++) {
     doc.setPage(i);
     doc.setFontSize(6.5); doc.setFont('helvetica','normal'); doc.setTextColor(...C_GRAY);
-    doc.text(`${yhtio}  ·  Isännöitsijäntodistus  ·  isannoitsijantodistus.fi`, ML, 291);
+    doc.text(`${yhtio}  ·  Isännöitsijäntodistus  ·  isannoitsijantodistus.app`, ML, 291);
     doc.text(`Sivu ${i} / ${pages}`, W - MR, 291, { align: 'right' });
     doc.setDrawColor(...C_LIGHT);
     doc.line(ML, 288, W - MR, 288);
