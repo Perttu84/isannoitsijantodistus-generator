@@ -1348,7 +1348,12 @@ function generatePDF() {
   for (let i = 1; i <= pages; i++) {
     doc.setPage(i);
     doc.setFontSize(6.5); doc.setFont('helvetica','normal'); doc.setTextColor(...C_GRAY);
-    doc.text(`${yhtio}  ·  Isännöitsijäntodistus  ·  isannoitsijantodistus.app`, ML, 291);
+    const prefix = `${yhtio}  ·  Isännöitsijäntodistus  ·  `;
+    const linkText = 'isannoitsijantodistus.app';
+    doc.text(prefix + linkText, ML, 291);
+    const prefixW = doc.getTextWidth(prefix);
+    const linkW = doc.getTextWidth(linkText);
+    doc.link(ML + prefixW, 288.5, linkW, 3, { url: 'https://isannoitsijantodistus.app' });
     doc.text(`Sivu ${i} / ${pages}`, W - MR, 291, { align: 'right' });
     doc.setDrawColor(...C_LIGHT);
     doc.line(ML, 288, W - MR, 288);
