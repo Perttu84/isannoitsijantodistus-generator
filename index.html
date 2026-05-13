@@ -649,7 +649,7 @@ details.info li{font-size:.82rem;color:#444;line-height:1.45}
   <div class="mt">
     <div class="subsec">Yhtiökokouksen jälkeen ilmenneet korjaustarpeet</div>
     <div class="dyn-container" id="dyn-kokous-korjaukset"></div>
-    <button type="button" class="btn-add" onclick="addRow('dyn-kokous-korjaukset','simpletextarea')">+ Lisää kenttä</button>
+    <button type="button" class="btn-add" onclick="addRow('dyn-kokous-korjaukset','simpletextarea')">+ Lisää rivi</button>
   </div>
 </div>
 
@@ -964,6 +964,7 @@ function clearForm() {
 function generatePDF() {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+  doc.setProperties({ subject: 'isannoitsijantodistus.fi', creator: 'isannoitsijantodistus.fi', keywords: 'isannöitsijäntodistus' });
   const W = 210, ML = 15, MR = 15, CW = W - ML - MR;
   let y = 0;
 
@@ -1348,7 +1349,7 @@ function generatePDF() {
   for (let i = 1; i <= pages; i++) {
     doc.setPage(i);
     doc.setFontSize(6.5); doc.setFont('helvetica','normal'); doc.setTextColor(...C_GRAY);
-    doc.text(`${yhtio}  ·  Isännöitsijäntodistus`, ML, 291);
+    doc.text(`${yhtio}  ·  Isännöitsijäntodistus  ·  isannoitsijantodistus.fi`, ML, 291);
     doc.text(`Sivu ${i} / ${pages}`, W - MR, 291, { align: 'right' });
     doc.setDrawColor(...C_LIGHT);
     doc.line(ML, 288, W - MR, 288);
